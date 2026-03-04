@@ -1,0 +1,2754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060810">
+<title>Creator Agent</title>
+<!-- SheetJS loaded inline via CDN — fallback gracefully if offline -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* ============================================================
+   RESET & ROOT VARIABLES
+============================================================ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --g:#00e5a0;
+  --g2:#00b37f;
+  --bg:#060810;
+  --card:#0b0f1a;
+  --card2:#0f1420;
+  --border:#1a2135;
+  --border2:#232d45;
+  --muted:#6b7a99;
+  --text:#dce8f5;
+  --red:#ff4e6a;
+  --yellow:#f59e0b;
+  --blue:#4da6ff;
+  --purple:#a78bfa;
+  --font:'Courier New',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding-bottom:72px;overflow-x:hidden}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.hdr{
+  background:linear-gradient(90deg,#060c18,#0a0f1e);
+  border-bottom:1px solid var(--border);
+  padding:13px 18px;
+  position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(8px);
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-pulse{width:9px;height:9px;border-radius:50%;background:var(--g);box-shadow:0 0 10px var(--g);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.logo-name{color:var(--g);font-size:11px;letter-spacing:3px;font-weight:700}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.db-badge{
+  padding:4px 10px;background:#0a1a12;
+  border:1px solid #00e5a030;color:var(--g);
+  border-radius:20px;font-size:9px;letter-spacing:1px;
+  white-space:nowrap;
+}
+.ai-badge{padding:4px 10px;border-radius:20px;font-size:9px;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.ai-on{background:#0a1225;border:1px solid #4da6ff50;color:var(--blue)}
+.ai-off{background:#150d0d;border:1px solid #ff4e6a30;color:#ff4e6a}
+
+/* ============================================================
+   BOTTOM NAV
+============================================================ */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:linear-gradient(0deg,#040710,#060810);
+  border-top:1px solid var(--border);
+  display:flex;z-index:200;
+}
+.bnav-btn{
+  flex:1;padding:10px 4px 9px;
+  background:none;border:none;color:var(--muted);
+  cursor:pointer;font-family:var(--font);font-size:8px;
+  letter-spacing:.8px;display:flex;flex-direction:column;
+  align-items:center;gap:4px;transition:color .2s;
+  border-top:2px solid transparent;
+}
+.bnav-btn.active{color:var(--g);border-top-color:var(--g)}
+.bnav-btn .ni{font-size:17px;line-height:1}
+
+/* ============================================================
+   PAGES
+============================================================ */
+.page{display:none;padding:16px;max-width:960px;margin:0 auto;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ============================================================
+   CARDS
+============================================================ */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;padding:18px;margin-bottom:14px;
+}
+.card-hd{
+  font-size:9px;color:var(--g);letter-spacing:2.5px;
+  font-weight:700;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.card-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ============================================================
+   FORM ELEMENTS
+============================================================ */
+label{font-size:9px;color:var(--muted);letter-spacing:1.2px;display:block;margin-bottom:5px}
+input,select,textarea{
+  width:100%;padding:10px 13px;
+  background:#07091200;border:1px solid var(--border2);
+  border-radius:7px;color:var(--text);font-family:var(--font);
+  font-size:13px;margin-bottom:13px;
+  background:linear-gradient(135deg,#080c1a,#0b0f1e);
+  transition:border-color .2s,box-shadow .2s;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--g);
+  box-shadow:0 0 0 3px #00e5a012;
+}
+input::placeholder{color:#3a4560}
+select[multiple]{height:110px;padding:6px;margin-bottom:13px}
+select[multiple] option:checked{background:#00e5a020;color:var(--g)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:540px){.g2,.g3{grid-template-columns:1fr}}
+.hint{font-size:9px;color:#3a4560;margin-top:-10px;margin-bottom:12px}
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn{
+  padding:12px 18px;border:none;border-radius:8px;
+  cursor:pointer;font-family:var(--font);
+  font-size:11px;font-weight:700;letter-spacing:1.2px;
+  transition:all .2s;width:100%;display:block;margin-bottom:10px;
+}
+.btn-g{
+  background:linear-gradient(135deg,var(--g),var(--g2));
+  color:#000;box-shadow:0 4px 14px #00e5a030;
+}
+.btn-g:hover{transform:translateY(-1px);box-shadow:0 6px 20px #00e5a045}
+.btn-g:active{transform:none}
+.btn-sm{
+  padding:8px 14px;font-size:10px;
+  width:auto;display:inline-block;margin-bottom:0;
+  border-radius:6px;cursor:pointer;font-family:var(--font);
+  font-weight:700;letter-spacing:.8px;border:none;transition:all .2s;
+}
+.btn-out{
+  background:transparent;border:1px solid var(--border2);
+  color:var(--muted);
+}
+.btn-out:hover{border-color:var(--g);color:var(--g)}
+.btn-red{background:#1a0a0d;border:1px solid #ff4e6a40;color:var(--red)}
+.btn-red:hover{background:#250d12}
+.btn-blue{background:#0a1225;border:1px solid #4da6ff40;color:var(--blue)}
+.btn-blue:hover{background:#0d1830}
+.btn-pur{background:#130f1f;border:1px solid #a78bfa40;color:var(--purple)}
+.btn-pur:hover{background:#1a1330}
+
+/* ============================================================
+   STATS
+============================================================ */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;padding:12px;text-align:center;
+}
+.sv{font-size:22px;font-weight:700;color:var(--g);line-height:1.1}
+.sl{font-size:8px;color:var(--muted);letter-spacing:1.5px;margin-top:4px}
+
+/* ============================================================
+   TABLE
+============================================================ */
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{
+  padding:10px 11px;text-align:left;
+  color:var(--muted);font-size:9px;letter-spacing:1.5px;
+  border-bottom:1px solid var(--border);
+  background:#060a14;white-space:nowrap;
+}
+td{padding:10px 11px;border-bottom:1px solid #0d1120;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#0c1020}
+.chk{width:32px;text-align:center}
+input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--g);margin-bottom:0}
+
+/* ============================================================
+   LINKS / BADGES
+============================================================ */
+.ig-btn{
+  display:inline-block;padding:2px 8px;border-radius:4px;
+  font-size:9px;text-decoration:none;
+  border:1px solid #e1306c40;color:#e1306c;
+  background:#190a10;margin:1px;white-space:nowrap;
+}
+.yt-btn{
+  display:inline-block;padding:2px 8px;border-radius:4px;
+  font-size:9px;text-decoration:none;
+  border:1px solid #ff444440;color:#ff4444;
+  background:#160707;margin:1px;white-space:nowrap;
+}
+.bdg{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;margin:1px}
+.bdg-ig{background:#120d1a;border:1px solid #a855f730;color:var(--purple)}
+.bdg-yt{background:#160808;border:1px solid #ef444430;color:#ef4444}
+
+/* ============================================================
+   SCORE BAR
+============================================================ */
+.sbar{height:3px;border-radius:2px;background:var(--border);width:50px;margin-bottom:3px}
+.sfill{height:100%;border-radius:2px}
+.score-cell{min-width:60px}
+
+/* ============================================================
+   MESSAGES
+============================================================ */
+.msg{padding:11px 14px;border-radius:8px;font-size:11px;margin-bottom:13px;line-height:1.7}
+.msg-ok{background:#071510;border:1px solid #00e5a035;color:var(--g)}
+.msg-err{background:#150708;border:1px solid #ff4e6a35;color:var(--red)}
+.msg-info{background:#07101a;border:1px solid #4da6fa35;color:var(--blue)}
+.msg-warn{background:#151007;border:1px solid #f59e0b35;color:var(--yellow)}
+
+/* ============================================================
+   UPLOAD ZONE
+============================================================ */
+.upload-zone{
+  border:2px dashed var(--border2);border-radius:10px;
+  padding:44px 20px;text-align:center;cursor:pointer;
+  transition:all .25s;margin-bottom:14px;
+  background:linear-gradient(135deg,#070b18,#090d1c);
+}
+.upload-zone:hover,.upload-zone.drag{
+  border-color:var(--g);
+  background:linear-gradient(135deg,#07150f,#091a10);
+  box-shadow:0 0 30px #00e5a015 inset;
+}
+.upload-icon{font-size:36px;margin-bottom:10px}
+
+/* ============================================================
+   PROGRESS BAR
+============================================================ */
+.progress-wrap{background:var(--border);border-radius:4px;height:5px;overflow:hidden;margin-top:8px}
+.progress-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--g2),var(--g));transition:width .4s ease;width:0%}
+
+/* ============================================================
+   PARSED FIELDS
+============================================================ */
+.pf{display:flex;align-items:flex-start;gap:12px;padding:9px 13px;background:var(--card2);border:1px solid var(--border);border-radius:6px;margin-bottom:6px}
+.pk{color:var(--muted);font-size:9px;letter-spacing:1px;min-width:100px;padding-top:3px;text-transform:uppercase}
+.pv{color:var(--g);font-size:13px;font-weight:600}
+.pv.na{color:var(--yellow)}
+
+/* ============================================================
+   SPINNER
+============================================================ */
+.spin{display:inline-block;width:13px;height:13px;border:2px solid #00e5a025;border-top-color:var(--g);border-radius:50%;animation:spinA .8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spinA{to{transform:rotate(360deg)}}
+
+/* ============================================================
+   TOGGLE SWITCH
+============================================================ */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:11px;color:var(--text)}
+.toggle-sub{font-size:9px;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{
+  position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;
+  background:#1a2035;border:1px solid var(--border2);
+  border-radius:22px;transition:all .3s;
+}
+.slider::before{
+  content:'';position:absolute;height:16px;width:16px;
+  left:2px;bottom:2px;background:var(--muted);
+  border-radius:50%;transition:all .3s;
+}
+input:checked + .slider{background:#071a11;border-color:var(--g);box-shadow:0 0 8px #00e5a030}
+input:checked + .slider::before{transform:translateX(18px);background:var(--g)}
+
+/* ============================================================
+   HEAL / ERROR LOG
+============================================================ */
+.log-item{padding:12px 14px;background:var(--card2);border:1px solid var(--border);border-radius:7px;margin-bottom:8px;font-size:11px}
+.log-time{color:var(--muted);font-size:9px;margin-bottom:4px}
+.log-err{color:var(--red);margin:5px 0;line-height:1.5}
+.log-fix{color:var(--g);font-size:10px}
+.log-pending{color:var(--yellow);font-size:10px}
+
+/* ============================================================
+   PAGINATION
+============================================================ */
+.pgn{display:flex;align-items:center;gap:8px;margin-top:12px;justify-content:center;flex-wrap:wrap}
+.pg-btn{padding:7px 14px;border:1px solid var(--border2);background:transparent;color:var(--muted);border-radius:5px;cursor:pointer;font-family:var(--font);font-size:10px;transition:all .2s}
+.pg-btn:hover{border-color:var(--g);color:var(--g)}
+.pg-info{color:var(--muted);font-size:10px;letter-spacing:.5px}
+
+/* ============================================================
+   MISC
+============================================================ */
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:12px;letter-spacing:.5px}
+.section-sep{height:1px;background:var(--border);margin:16px 0}
+.no-db-state{text-align:center;padding:40px 20px}
+.no-db-state .icon{font-size:48px;margin-bottom:14px}
+.no-db-state h3{color:var(--g);font-size:13px;letter-spacing:2px;margin-bottom:8px}
+.no-db-state p{color:var(--muted);font-size:11px;margin-bottom:18px;line-height:1.7}
+.action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.sel-info{font-size:10px;color:var(--muted);padding:5px 0}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-pulse"></div>
+    <div>
+      <div class="logo-name">CREATOR AGENT</div>
+      <div class="logo-sub" id="db-count">Initializing...</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="ai-badge ai-off" id="ai-badge" onclick="toggleAI()">AI OFF</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: SHORTLIST
+============================================================ -->
+<div class="page active" id="pg-shortlist">
+
+  <!-- No DB State -->
+  <div id="no-db-msg" style="display:none">
+    <div class="card">
+      <div class="no-db-state">
+        <div class="icon">📂</div>
+        <h3>DATABASE EMPTY</h3>
+        <p>Import creator data first.<br>Go to the Database tab to upload Excel or CSV files.</p>
+        <button class="btn btn-g" style="width:auto;display:inline-block" onclick="switchTab('db')">→ Open Database Tab</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shortlist Form -->
+  <div id="shortlist-form" style="display:none">
+    <div class="card">
+      <div class="card-hd">CAMPAIGN BRIEF</div>
+      <div class="g2">
+        <div><label>BRAND NAME</label><input id="b-brand" placeholder="e.g. Nike India"></div>
+        <div><label>OBJECTIVE</label><input id="b-obj" placeholder="Product Launch, Awareness..."></div>
+      </div>
+      <div class="g2">
+        <div>
+          <label>NICHE — Ctrl+Click for multiple</label>
+          <select id="b-niche" multiple>
+            <option>Fashion</option><option>Beauty</option><option>Lifestyle</option>
+            <option>Travel</option><option>Fitness</option><option>Food</option>
+            <option>Finance</option><option>Tech</option><option>Gaming</option>
+            <option>Comedy</option><option>Podcast</option><option>Education</option>
+            <option>Dance</option><option>Music</option><option>Photography</option>
+            <option>Parenting</option><option>Couple</option><option>Meme</option>
+            <option>Entrepreneur</option><option>Sports</option><option>Astrology</option>
+            <option>Chef</option><option>Skincare</option><option>Makeup</option>
+          </select>
+          <div class="hint">Mobile: long-press to select multiple</div>
+        </div>
+        <div>
+          <label>PLATFORM</label>
+          <select id="b-plat" style="margin-bottom:12px">
+            <option value="">All Platforms</option>
+            <option>Instagram</option><option>YouTube</option><option>Both</option>
+          </select>
+          <label>GENDER</label>
+          <select id="b-gen">
+            <option value="">Any Gender</option>
+            <option>Male</option><option>Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="g3">
+        <div><label>LOCATION</label><input id="b-loc" placeholder="Mumbai, Delhi..."></div>
+        <div><label>MIN FOLLOWERS</label><input id="b-minf" type="number" placeholder="10000"></div>
+        <div><label>MAX FOLLOWERS</label><input id="b-maxf" type="number" placeholder="500000"></div>
+      </div>
+      <label>KEYWORD SEARCH</label>
+      <input id="b-kw" placeholder="skincare, luxury, regional...">
+      <button class="btn btn-g" onclick="runShortlist()">⚡ GENERATE SHORTLIST</button>
+    </div>
+
+    <!-- Shortlist Results -->
+    <div id="s-out" style="display:none">
+      <div class="stats">
+        <div class="stat"><div class="sv" id="s-db">0</div><div class="sl">DATABASE</div></div>
+        <div class="stat"><div class="sv" id="s-match">0</div><div class="sl">MATCHED</div></div>
+        <div class="stat"><div class="sv" id="s-top">-</div><div class="sl">TOP SCORE</div></div>
+      </div>
+      <div class="action-bar">
+        <button class="btn-sm btn-out" onclick="exportCSV(lastS,'shortlist')">⬇ Export CSV</button>
+        <button class="btn-sm btn-blue" onclick="exportXLSX(lastS,'shortlist')">⬇ Export XLSX</button>
+        <button class="btn-sm btn-g" onclick="exportSelected()">✓ Export Selected</button>
+        <button class="btn-sm btn-out" onclick="toggleSelectAll()">☐ Select All</button>
+        <button class="btn-sm btn-out" onclick="document.getElementById('s-out').style.display='none'">✕ Clear</button>
+      </div>
+      <div class="sel-info" id="sel-info">0 creators selected</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="chk"><input type="checkbox" id="chk-all" onchange="selectAll(this.checked)"></th>
+              <th>SR</th><th>NAME</th><th>LINKS</th><th>NICHE</th>
+              <th>LOCATION</th><th>IG</th><th>YT</th><th>CONTACT</th>
+              <th>COST</th><th>SCORE</th>
+            </tr>
+          </thead>
+          <tbody id="s-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: BRIEF PARSER
+============================================================ -->
+<div class="page" id="pg-brief">
+  <div class="card">
+    <div class="card-hd">CAMPAIGN BRIEF PARSER</div>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:14px;line-height:1.8">
+      Paste any brief from WhatsApp, email, or chat. The parser will extract all campaign requirements automatically.
+    </p>
+    <label>BRIEF TEXT</label>
+    <textarea id="brief-txt" rows="9" placeholder="Example:
+Hi team, we need creators for Mamaearth campaign.
+Niche: Beauty, Skincare
+Platform: Instagram
+Location: Mumbai, Delhi
+Followers: 50k to 500k
+Female creators only
+Budget: ₹15,000–25,000 per reel
+Deliverable: 1 Reel + 2 Stories"></textarea>
+
+    <div class="action-bar">
+      <button class="btn-sm btn-g" id="ai-parse-btn" onclick="parseAI()">🤖 AI Parse</button>
+      <button class="btn-sm btn-out" onclick="parseLocal()">⚡ Quick Parse (Offline)</button>
+    </div>
+    <div class="msg msg-info" style="font-size:10px">
+      🔒 Privacy: Only the brief text is sent to the AI — your creator database is never transmitted.
+    </div>
+  </div>
+
+  <div id="parsed-box" style="display:none">
+    <div class="card">
+      <div class="card-hd">EXTRACTED CAMPAIGN DETAILS</div>
+      <div id="parsed-fields"></div>
+      <div class="g2" style="margin-top:14px">
+        <div>
+          <label>HOW MANY CREATORS NEEDED</label>
+          <input id="b-count" type="number" placeholder="e.g. 10 (default: 100)" min="1" max="500" style="margin-bottom:0">
+        </div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:1px">
+          <button class="btn btn-g" onclick="briefShortlist()" style="margin-bottom:0">⚡ Generate Shortlist from Brief</button>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn-sm btn-out" onclick="document.getElementById('parsed-box').style.display='none'">✕ Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="b-out" style="display:none">
+    <div class="stats">
+      <div class="stat"><div class="sv" id="b-match">0</div><div class="sl">MATCHED</div></div>
+      <div class="stat"><div class="sv" id="b-top">-</div><div class="sl">TOP SCORE</div></div>
+      <div class="stat"><div class="sv" id="b-db">0</div><div class="sl">DATABASE</div></div>
+    </div>
+    <div class="action-bar">
+      <button class="btn-sm btn-out" onclick="exportCSV(lastB,'brief_shortlist')">⬇ Export All CSV</button>
+      <button class="btn-sm btn-blue" onclick="exportXLSX(lastB,'brief_shortlist')">⬇ Export All XLSX</button>
+      <button class="btn-sm btn-g" onclick="exportBriefSelected()">✓ Export Selected</button>
+      <button class="btn-sm btn-out" onclick="toggleBriefSelectAll()">☐ Select All</button>
+    </div>
+    <div class="sel-info" id="b-sel-info">0 creators selected</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th class="chk"><input type="checkbox" id="b-chk-all" onchange="briefSelectAll(this.checked)"></th>
+          <th>SR</th><th>NAME</th><th>LINKS</th><th>NICHE</th><th>LOCATION</th><th>IG</th><th>YT</th><th>CONTACT</th><th>COST</th><th>SCORE</th>
+        </tr></thead>
+        <tbody id="b-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: BROWSE
+============================================================ -->
+<div class="page" id="pg-browse">
+  <div class="card">
+    <div class="card-hd">BROWSE DATABASE</div>
+    <input id="br-q" placeholder="🔍 Search by name, niche, location..." oninput="brFilter()" style="margin-bottom:10px">
+    <div class="g2" style="margin-bottom:10px">
+      <select id="br-ni" onchange="brFilter()">
+        <option value="">All Niches</option>
+        <option>Fashion</option><option>Beauty</option><option>Lifestyle</option>
+        <option>Travel</option><option>Fitness</option><option>Food</option>
+        <option>Finance</option><option>Tech</option><option>Gaming</option>
+        <option>Comedy</option><option>Dance</option><option>Sports</option>
+        <option>Meme</option><option>Parenting</option><option>Skincare</option><option>Makeup</option>
+      </select>
+      <select id="br-pl" onchange="brFilter()">
+        <option value="">All Platforms</option>
+        <option>Instagram</option><option>YouTube</option>
+      </select>
+    </div>
+    <input id="br-lo" placeholder="📍 Filter by location..." oninput="brFilter()" style="margin-bottom:6px">
+    <div id="br-count" style="color:var(--muted);font-size:10px;margin-bottom:2px"></div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>NAME</th><th>LINKS</th><th>NICHE</th><th>LOCATION</th><th>IG</th><th>YT</th><th>CONTACT</th><th>COST</th></tr></thead>
+      <tbody id="br-body"></tbody>
+    </table>
+  </div>
+  <div class="pgn">
+    <button class="pg-btn" onclick="pgChange(-1)">← Prev</button>
+    <span class="pg-info" id="pg-info"></span>
+    <button class="pg-btn" onclick="pgChange(1)">Next →</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: DATABASE
+============================================================ -->
+<div class="page" id="pg-db">
+  <div class="card">
+    <div class="card-hd">IMPORT CREATOR DATA</div>
+    <div class="upload-zone" id="drop-zone"
+      onclick="document.getElementById('xl-input').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleDrop(event)">
+      <div class="upload-icon">📦</div>
+      <div style="color:var(--g);font-weight:700;margin-bottom:6px;font-size:13px">Upload Files or ZIP Archive</div>
+      <div style="color:var(--muted);font-size:11px">Click to browse or drag & drop</div>
+      <div style="color:#2a3550;font-size:10px;margin-top:6px">.xlsx &nbsp;.xls &nbsp;.csv &nbsp;.zip — all supported</div>
+    </div>
+    <input id="xl-input" type="file" accept=".xlsx,.xls,.csv,.zip" multiple style="display:none" onchange="loadFiles(this.files)">
+
+    <div id="load-msg"></div>
+    <div id="load-progress" style="display:none;margin-top:4px">
+      <div style="color:var(--g);font-size:11px;margin-bottom:8px" id="load-status">Loading...</div>
+      <div class="progress-wrap"><div class="progress-bar" id="load-bar"></div></div>
+    </div>
+
+    <!-- Import Log — full detailed -->
+    <div id="import-debug" style="display:none;margin-top:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:9px;color:var(--g);letter-spacing:2px;font-weight:700">IMPORT LOG</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm btn-out" style="font-size:9px;padding:4px 10px" onclick="exportImportLog()">⬇ Export Log</button>
+          <button class="btn-sm btn-out" style="font-size:9px;padding:4px 10px" onclick="clearImportLog()">✕ Clear</button>
+        </div>
+      </div>
+      <div id="import-debug-log" style="font-size:10px;line-height:2;max-height:220px;overflow-y:auto;background:#04060e;border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'Courier New',monospace"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">DATABASE STATUS</div>
+    <div class="stats">
+      <div class="stat"><div class="sv" id="db-total">0</div><div class="sl">TOTAL CREATORS</div></div>
+      <div class="stat"><div class="sv" id="db-manual">0</div><div class="sl">MANUAL ENTRIES</div></div>
+      <div class="stat"><div class="sv" id="db-sources">0</div><div class="sl">SOURCES</div></div>
+    </div>
+    <div class="action-bar">
+      <button class="btn-sm btn-out" onclick="exportCSV(allC,'master_database')">⬇ Export Full DB (CSV)</button>
+      <button class="btn-sm btn-blue" onclick="exportXLSX(allC,'master_database')">⬇ Export Full DB (XLSX)</button>
+      <button class="btn-sm btn-red" onclick="clearDB()">🗑 Clear All Data</button>
+    </div>
+  </div>
+
+  <!-- Add Creator Manually -->
+  <div class="card">
+    <div class="card-hd">ADD CREATOR MANUALLY</div>
+    <div id="add-msg"></div>
+    <div class="g2">
+      <div><label>NAME *</label><input id="a-nm" placeholder="Full name"></div>
+      <div>
+        <label>NICHE</label>
+        <select id="a-ni" style="margin-bottom:13px">
+          <option value="">Select niche</option>
+          <option>Fashion</option><option>Beauty</option><option>Lifestyle</option>
+          <option>Travel</option><option>Fitness</option><option>Food</option>
+          <option>Finance</option><option>Tech</option><option>Gaming</option>
+          <option>Comedy</option><option>Dance</option><option>Skincare</option><option>Makeup</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2">
+      <div><label>INSTAGRAM LINK</label><input id="a-il" placeholder="https://instagram.com/..."></div>
+      <div><label>IG FOLLOWERS</label><input id="a-if" type="number" placeholder="50000"></div>
+    </div>
+    <div class="g2">
+      <div><label>YOUTUBE LINK</label><input id="a-yl" placeholder="https://youtube.com/..."></div>
+      <div><label>YT SUBSCRIBERS</label><input id="a-ys" type="number" placeholder="100000"></div>
+    </div>
+    <div class="g3">
+      <div><label>LOCATION</label><input id="a-lo" placeholder="City / State"></div>
+      <div><label>GENDER</label><select id="a-ge"><option value="">—</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+      <div><label>COST PER REEL (₹)</label><input id="a-co" placeholder="15000"></div>
+    </div>
+    <div class="g2">
+      <div><label>CONTACT</label><input id="a-ct" placeholder="+91..."></div>
+      <div><label>EMAIL</label><input id="a-em" placeholder="creator@email.com"></div>
+    </div>
+    <label>NOTES</label>
+    <textarea id="a-no" rows="2" placeholder="Additional information..."></textarea>
+    <button class="btn btn-g" onclick="addCreator()">➕ ADD TO DATABASE</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: SETTINGS
+============================================================ -->
+<div class="page" id="pg-settings">
+
+  <!-- AI Config — Open, any provider -->
+  <div class="card">
+    <div class="card-hd">AI CONFIGURATION</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Enable AI Features</div>
+        <div class="toggle-sub">Use any AI provider for brief parsing and support</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="ai-toggle" onchange="onAIToggle()">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div id="api-section" style="display:none;margin-top:16px">
+      <label>API PROVIDER</label>
+      <select id="ai-provider" onchange="onProviderChange()" style="margin-bottom:13px">
+        <option value="groq">Groq (Free — llama3-8b-8192)</option>
+        <option value="openai">OpenAI (GPT-4o-mini / GPT-4)</option>
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="custom">Custom / Other (OpenAI-compatible)</option>
+      </select>
+
+      <label>API KEY</label>
+      <input id="api-key" type="password" placeholder="Paste your API key here">
+
+      <div id="custom-url-row" style="display:none">
+        <label>CUSTOM API ENDPOINT URL</label>
+        <input id="custom-url" placeholder="https://api.yourprovider.com/v1/chat/completions">
+      </div>
+
+      <div id="custom-model-row" style="display:none">
+        <label>MODEL NAME</label>
+        <input id="custom-model" placeholder="e.g. gpt-4o-mini, llama3-70b, mistral-7b">
+      </div>
+
+      <button class="btn btn-g" onclick="saveKey()" style="margin-top:4px">Save Configuration</button>
+
+      <div class="msg msg-info" style="font-size:10px;margin-top:8px">
+        🔒 Keys stored only on this device — never sent anywhere except your chosen AI provider.<br><br>
+        <strong>Free options:</strong><br>
+        • <strong>Groq</strong>: console.groq.com → free llama3 access<br>
+        • <strong>OpenAI</strong>: platform.openai.com → GPT-4o-mini is very cheap<br>
+        • <strong>Anthropic</strong>: console.anthropic.com → Claude API<br>
+        • <strong>Custom</strong>: Any OpenAI-compatible endpoint (Ollama, Together AI, etc.)
+      </div>
+    </div>
+  </div>
+
+  <!-- Support Assistant -->
+  <div class="card">
+    <div class="card-hd">SUPPORT ASSISTANT</div>
+    <label>DESCRIBE YOUR ISSUE</label>
+    <textarea id="support-txt" rows="5" placeholder="Describe your issue here. e.g., 'Excel file is not loading', 'Shortlist showing no results'..."></textarea>
+    <button class="btn btn-g" onclick="runSupport()">🔧 Get Help</button>
+    <div id="support-out" style="display:none">
+      <div class="card-hd" style="margin-top:14px">SUGGESTED SOLUTION</div>
+      <div id="support-result" style="font-size:12px;line-height:1.8;color:var(--text)"></div>
+    </div>
+  </div>
+
+  <!-- Error Log -->
+  <div class="card">
+    <div class="card-hd">ERROR LOG (<span id="err-count">0</span> entries)</div>
+    <div id="heal-log"><div class="empty">No errors — everything is running smoothly ✅</div></div>
+    <div class="action-bar" style="margin-top:12px">
+      <button class="btn-sm btn-out" onclick="clearErrors()">Clear Log</button>
+    </div>
+  </div>
+
+  <!-- App Info -->
+  <div class="card" id="doc-download-section">
+    <div class="card-hd">📖 USER GUIDE</div>
+    <div style="color:var(--muted);font-size:11px;line-height:1.8;margin-bottom:12px">
+      Complete reference guide — sheet format, brief writing, POC tracking, best practices.
+    </div>
+    <button class="btn btn-blue" onclick="window.open('CreatorAgent_UserGuide.docx')" style="margin-bottom:8px">⬇ Download User Guide (DOCX)</button>
+    <div style="color:var(--muted);font-size:9px">Guide tab ke andar bhi sab content available hai →</div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">APPLICATION INFO</div>
+    <div style="color:var(--muted);font-size:11px;line-height:2.2">
+      <div>Version: 8.0 | Offline-First</div>
+      <div>Storage: IndexedDB (local device only)</div>
+      <div>New: ZIP upload · POC tracking · Cost Date · Guide tab · WhatsApp→AI prompt</div>
+      <div>AI: Only brief text sent — creator data NEVER transmitted</div>
+      <div>Formats: XLSX, XLS, CSV, ZIP import &amp; XLSX/CSV export</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     BOTTOM NAV
+============================================================ -->
+<div class="bnav">
+  <button class="bnav-btn active" id="nav-shortlist" onclick="switchTab('shortlist')">
+    <span class="ni">⚡</span><span>SHORTLIST</span>
+  </button>
+  <button class="bnav-btn" id="nav-brief" onclick="switchTab('brief')">
+    <span class="ni">💬</span><span>BRIEF</span>
+  </button>
+  <button class="bnav-btn" id="nav-browse" onclick="switchTab('browse')">
+    <span class="ni">🗃</span><span>BROWSE</span>
+  </button>
+  <button class="bnav-btn" id="nav-db" onclick="switchTab('db')">
+    <span class="ni">📂</span><span>DATABASE</span>
+  </button>
+  <button class="bnav-btn" id="nav-guide" onclick="switchTab('guide')">
+    <span class="ni">📖</span><span>GUIDE</span>
+  </button>
+  <button class="bnav-btn" id="nav-settings" onclick="switchTab('settings')">
+    <span class="ni">⚙</span><span>SETTINGS</span>
+  </button>
+</div>
+
+<!-- ============================================================
+     PAGE: GUIDE
+============================================================ -->
+<div class="page" id="pg-guide">
+
+  <!-- Slide nav -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="display:flex;background:var(--card2);border-bottom:1px solid var(--border)">
+      <button class="guide-tab active" id="gtab-0" onclick="switchGuide(0)">📋 Sheet Format</button>
+      <button class="guide-tab" id="gtab-1" onclick="switchGuide(1)">✍️ Brief Format</button>
+      <button class="guide-tab" id="gtab-2" onclick="switchGuide(2)">📱 WhatsApp→AI</button>
+      <button class="guide-tab" id="gtab-3" onclick="switchGuide(3)">💡 Best Practices</button>
+    </div>
+  </div>
+
+  <!-- Download doc button -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+    <button class="btn-sm btn-blue" onclick="switchTab('settings');setTimeout(()=>document.getElementById('doc-download-section').scrollIntoView({behavior:'smooth'}),200)">⬇ Download Full Guide (DOC)</button>
+  </div>
+
+  <!-- SLIDE 0: Sheet Format -->
+  <div class="guide-slide" id="gslide-0">
+    <div class="card">
+      <div class="card-hd">📋 DATABASE SHEET FORMAT</div>
+      <div style="color:var(--muted);font-size:11px;margin-bottom:14px;line-height:1.8">Your Excel/CSV file ke har row mein ek creator hoga. Neeche sab required columns hain with accepted names.</div>
+
+      <!-- Column table -->
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>COLUMN NAME</th><th>ALSO ACCEPTED AS</th><th>EXAMPLE</th><th>REQUIRED?</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td style="color:var(--g);font-weight:700">Name</td><td style="color:var(--muted);font-size:10px">Creator, Influencer, Handle, Artist, Talent</td><td style="font-size:10px">Priya Sharma</td><td><span style="color:#00e5a0;font-weight:700">YES</span></td></tr>
+            <tr><td>2</td><td style="color:var(--g);font-weight:700">Niche</td><td style="color:var(--muted);font-size:10px">Type, Category, Vertical, Content Type</td><td style="font-size:10px">Fashion</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>3</td><td style="color:var(--g);font-weight:700">IG Link</td><td style="color:var(--muted);font-size:10px">Insta Link, Instagram, Instagram Link, Profile Link</td><td style="font-size:10px">https://instagram.com/priya</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>4</td><td style="color:var(--g);font-weight:700">IG Followers</td><td style="color:var(--muted);font-size:10px">Followers, Insta Followers, Instagram Followers</td><td style="font-size:10px">245000 or 245K</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>5</td><td style="color:var(--g);font-weight:700">YT Link</td><td style="color:var(--muted);font-size:10px">YouTube Link, YT, Youtube</td><td style="font-size:10px">https://youtube.com/c/priya</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>6</td><td style="color:var(--g);font-weight:700">YT Subscribers</td><td style="color:var(--muted);font-size:10px">Subscribers, YT Subs, YouTube Subscribers</td><td style="font-size:10px">92000 or 92K</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>7</td><td style="color:var(--g);font-weight:700">Gender</td><td style="color:var(--muted);font-size:10px">Sex</td><td style="font-size:10px">Female / Male</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>8</td><td style="color:var(--g);font-weight:700">Location</td><td style="color:var(--muted);font-size:10px">City, State, Based In, Place</td><td style="font-size:10px">Mumbai</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>9</td><td style="color:var(--g);font-weight:700">Contact</td><td style="color:var(--muted);font-size:10px">Phone, Mobile, WhatsApp, Phone No</td><td style="font-size:10px">+91-9876543210</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>10</td><td style="color:var(--g);font-weight:700">Email</td><td style="color:var(--muted);font-size:10px">E-mail, Mail, Gmail</td><td style="font-size:10px">priya@gmail.com</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>11</td><td style="color:var(--g);font-weight:700">Cost Per Reel</td><td style="color:var(--muted);font-size:10px">Cost, Rate, Price, Our Cost 1 Reel, Charges</td><td style="font-size:10px">18000</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>12</td><td style="color:var(--g);font-weight:700">Cost Date</td><td style="color:var(--muted);font-size:10px">Rate Date, Price Date, Cost As Of</td><td style="font-size:10px">Jan 2025</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>13</td><td style="color:var(--g);font-weight:700">POC Name</td><td style="color:var(--muted);font-size:10px">Contact Person, POC, Manager Name</td><td style="font-size:10px">Rahul Sharma</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>14</td><td style="color:var(--g);font-weight:700">POC Agency</td><td style="color:var(--muted);font-size:10px">Agency, Manager Agency, Talent Agency</td><td style="font-size:10px">Clout Agency</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>15</td><td style="color:var(--g);font-weight:700">Last Contacted</td><td style="color:var(--muted);font-size:10px">Last Contact, Contacted On, Last Talk</td><td style="font-size:10px">15 Mar 2025</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>16</td><td style="color:var(--g);font-weight:700">Status</td><td style="color:var(--muted);font-size:10px">Conversation Status, Deal Status</td><td style="font-size:10px">Contacted / Replied / Closed</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>17</td><td style="color:var(--g);font-weight:700">Notes</td><td style="color:var(--muted);font-size:10px">Remarks, Comments, Additional Info</td><td style="font-size:10px">Good for skincare</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>18</td><td style="color:var(--g);font-weight:700">Source</td><td style="color:var(--muted);font-size:10px">File, Origin, Sheet</td><td style="font-size:10px">Agency / Sheet Name</td><td style="color:var(--muted)">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="msg msg-info" style="margin-top:12px;font-size:10px;line-height:1.9">
+        💡 <strong>Only "Name" column is required.</strong> All others are optional.<br>
+        💡 Column names don't need to be exact — tool uses smart detection.<br>
+        💡 Supported file formats: <strong>.xlsx &nbsp; .xls &nbsp; .csv &nbsp; .zip</strong><br>
+        💡 ZIP: Put all 50 files in one ZIP and upload in one go.
+      </div>
+    </div>
+
+    <!-- Sample row visual -->
+    <div class="card">
+      <div class="card-hd">SAMPLE ROW (how your sheet should look)</div>
+      <div style="overflow-x:auto;font-size:9px;font-family:monospace;color:var(--muted);line-height:2.2;white-space:nowrap;background:#04060e;padding:12px;border-radius:6px;border:1px solid var(--border)">
+        <div style="color:var(--g);font-weight:700;margin-bottom:4px">Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Niche &nbsp;&nbsp; | IG Link &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | IG Followers | Gender | Location | Contact &nbsp;&nbsp;&nbsp;&nbsp; | Cost Per Reel | Cost Date | POC Name &nbsp;&nbsp; | Status</div>
+        <div style="color:var(--text)">Priya Sharma &nbsp;| Fashion &nbsp;| https://instagram.com/priya &nbsp;| 245000 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Female | Mumbai &nbsp;&nbsp;| +91-98765 &nbsp; | 18000 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Jan 2025 &nbsp;| Rahul / Clout | Contacted</div>
+        <div style="color:var(--text)">Rohan Mehta &nbsp;&nbsp;| Fitness &nbsp;&nbsp;| https://instagram.com/rohan &nbsp;| 180000 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Male &nbsp;&nbsp;| Delhi &nbsp;&nbsp;&nbsp;| +91-98112 &nbsp; | 15000 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Feb 2025 &nbsp;| NA &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Replied</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: Brief Format -->
+  <div class="guide-slide" id="gslide-1" style="display:none">
+    <div class="card">
+      <div class="card-hd">✍️ HOW TO WRITE A CAMPAIGN BRIEF</div>
+      <div style="color:var(--muted);font-size:11px;margin-bottom:14px;line-height:1.8">Brief BRIEF tab mein paste karo. AI Parse ya Quick Parse (Offline) use karo. Neeche format hai.</div>
+
+      <div class="card-hd" style="font-size:9px;color:var(--muted);margin-bottom:8px">IDEAL FORMAT</div>
+      <div style="background:#04060e;border:1px solid var(--g);border-radius:6px;padding:14px;font-size:11px;line-height:2;color:var(--text);font-family:monospace;margin-bottom:14px">
+        [Brand Name] brief — need [Number] [Niche] [Gender] creators from [City] for [Platform], [Follower range] followers<br>
+        Budget: ₹[Amount] per reel | Deliverables: [What they need to post]
+      </div>
+
+      <div class="card-hd" style="font-size:9px;color:var(--muted);margin-bottom:10px">EXAMPLES</div>
+
+      <div style="margin-bottom:10px">
+        <div style="font-size:9px;color:var(--g);letter-spacing:1px;margin-bottom:4px">ENGLISH</div>
+        <div style="background:#04060e;border:1px solid var(--border);border-radius:6px;padding:12px;font-size:11px;line-height:2;color:var(--text)">
+          Raymond brief — need 10 male fashion creators from Mumbai for Instagram, 50K-500K followers. Budget ₹20,000 per reel.
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <div style="font-size:9px;color:var(--g);letter-spacing:1px;margin-bottom:4px">HINGLISH</div>
+        <div style="background:#04060e;border:1px solid var(--border);border-radius:6px;padding:12px;font-size:11px;line-height:2;color:var(--text)">
+          Nike ka campaign hai, 15 fitness creators chahiye Mumbai aur Delhi se, Instagram ke liye, 100K se upar followers.
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <div style="font-size:9px;color:var(--g);letter-spacing:1px;margin-bottom:4px">SIMPLE / MINIMAL</div>
+        <div style="background:#04060e;border:1px solid var(--border);border-radius:6px;padding:12px;font-size:11px;line-height:2;color:var(--text)">
+          Nykaa, beauty, female, Mumbai, Instagram, 50K-300K
+        </div>
+      </div>
+
+      <div class="msg msg-info" style="font-size:10px;line-height:1.9;margin-top:4px">
+        ✅ Always mention: <strong>Brand Name, Niche, Platform, Location, Creator Count</strong><br>
+        ✅ Follower range format: <strong>50K-500K</strong> or <strong>50K to 500K</strong> or <strong>1L-5L</strong><br>
+        ✅ Gender: <strong>male / female / ladka / ladki</strong> sab work karta hai<br>
+        ✅ Cities: <strong>Mumbai, Delhi, Bangalore, Pune, Hyderabad</strong> etc.<br>
+        ⚠️ Platform name (Instagram) ko brand ki jagah mat likho
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">WHAT EACH FIELD MEANS IN SHORTLIST RESULT</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>FIELD</th><th>WHAT IT DOES</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--g)">Niche</td><td style="font-size:10px;color:var(--muted)">Creators whose niche matches get highest score (40 pts). Hard filter if selected.</td></tr>
+            <tr><td style="color:var(--g)">Location</td><td style="font-size:10px;color:var(--muted)">City match gives 20 pts. Hard filter if you type a city.</td></tr>
+            <tr><td style="color:var(--g)">Follower Range</td><td style="font-size:10px;color:var(--muted)">Hard filter — creators outside range are removed. Leave blank = no filter.</td></tr>
+            <tr><td style="color:var(--g)">Platform</td><td style="font-size:10px;color:var(--muted)">Instagram = must have IG link/followers. YouTube = must have YT. Both = must have both.</td></tr>
+            <tr><td style="color:var(--g)">Gender</td><td style="font-size:10px;color:var(--muted)">Hard filter if specified. Leave blank = any gender.</td></tr>
+            <tr><td style="color:var(--g)">Score %</td><td style="font-size:10px;color:var(--muted)">Green ≥70% = great match. Yellow ≥40% = ok. Red &lt;40% = partial match.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: WhatsApp → AI Prompt -->
+  <div class="guide-slide" id="gslide-2" style="display:none">
+    <div class="card">
+      <div class="card-hd">📱 WHATSAPP / EMAIL → AI PROMPT CONVERTER</div>
+      <div style="color:var(--muted);font-size:11px;margin-bottom:14px;line-height:1.8">
+        Client ne WhatsApp pe requirement bheja? Email mein random text tha? Paste karo neeche — main ek ready-made AI prompt banaunga.<br>
+        Copy karo → ChatGPT / Claude / Gemini mein paste karo → woh structured brief dega → tool mein use karo.
+      </div>
+
+      <label>PASTE RAW MESSAGE (any language — WhatsApp, email, SMS, chat)</label>
+      <textarea id="wa-input" rows="6" placeholder="e.g. bhai raymond ke liye kuch fashion wale chahiye mumbai se, male ho, insta pe active ho, budget 15-20k hai, reel chahiye ek, 10 creators bhejo list"></textarea>
+      <button class="btn btn-g" onclick="generateAIPrompt()">⚡ Generate AI Prompt</button>
+
+      <div id="wa-out" style="display:none;margin-top:16px">
+        <div class="card-hd" style="margin-bottom:8px">GENERATED PROMPT — Copy & Paste into Any AI</div>
+        <div id="wa-prompt-box" style="background:#04060e;border:1px solid var(--g);border-radius:6px;padding:14px;font-size:11px;line-height:1.9;color:var(--text);white-space:pre-wrap;font-family:monospace"></div>
+        <button class="btn-sm btn-g" style="margin-top:8px" onclick="copyPrompt()">📋 Copy Prompt</button>
+        <div id="wa-copy-msg" style="color:var(--g);font-size:10px;margin-top:4px;display:none">✅ Copied to clipboard!</div>
+
+        <div class="msg msg-info" style="margin-top:12px;font-size:10px;line-height:2">
+          <strong>How to use this prompt:</strong><br>
+          1. Copy the prompt above<br>
+          2. Open ChatGPT / Claude / Gemini / any AI<br>
+          3. Paste and send<br>
+          4. AI will return a structured brief<br>
+          5. Copy the structured brief → go to BRIEF tab in this tool → paste → Quick Parse or AI Parse
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: Best Practices -->
+  <div class="guide-slide" id="gslide-3" style="display:none">
+    <div class="card">
+      <div class="card-hd">💡 BEST PRACTICES — Maximum Results</div>
+
+      <div style="margin-bottom:18px">
+        <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:8px">DATABASE TIPS</div>
+        <div class="guide-tip">📦 <strong>ZIP upload:</strong> 50 files ek ZIP mein daal ke upload karo — ek hi click mein sab process</div>
+        <div class="guide-tip">🔁 <strong>Duplicate handling:</strong> Same creator naam se duplicate automatically remove hoga</div>
+        <div class="guide-tip">📋 <strong>Column name:</strong> Sirf "Name" column required hai — baaki sab optional</div>
+        <div class="guide-tip">📊 <strong>Sheet tabs:</strong> Summary, Dashboard, README named sheets automatically skip hoti hain</div>
+        <div class="guide-tip">💰 <strong>Cost date:</strong> "Cost Per Reel" ke saath "Cost Date" column bhi rakho — e.g. "Jan 2025" — taaki pata rahe kab ka rate tha</div>
+        <div class="guide-tip">👤 <strong>POC tracking:</strong> POC Name + POC Agency + Last Contacted + Status — in 4 columns se pata rahega last mein kisse baat hui thi</div>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:8px">SHORTLIST TIPS</div>
+        <div class="guide-tip">🎯 <strong>Start broad:</strong> Pehle sirf niche filter karo — phir location + followers add karo</div>
+        <div class="guide-tip">📍 <strong>Location tip:</strong> City name exactly likho (Mumbai not Bombay) — ya blank chhod do</div>
+        <div class="guide-tip">📊 <strong>Score ≥70%:</strong> Green score wale creators best match hain — prefer karo</div>
+        <div class="guide-tip">✅ <strong>Select creators:</strong> Checkbox pe tick karo → "Export Selected" se sirf selected ki XLSX download</div>
+        <div class="guide-tip">🔢 <strong>Count limit:</strong> "Need X creators" field mein number dalo — default 100 hai</div>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:8px">BRIEF TIPS</div>
+        <div class="guide-tip">🤖 <strong>AI Parse:</strong> Settings mein Groq free API key dalo → AI automatically sab extract karega</div>
+        <div class="guide-tip">⚡ <strong>Quick Parse:</strong> Internet nahi hai? "Quick Parse (Offline)" use karo — regex se parse hoga</div>
+        <div class="guide-tip">📱 <strong>WhatsApp message:</strong> Guide tab → WhatsApp→AI slide → paste karo → ready prompt milega</div>
+        <div class="guide-tip">🌐 <strong>Any language:</strong> Hindi, Hinglish, Marathi, English — sab kaam karega</div>
+      </div>
+
+      <div>
+        <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:8px">EXPORT TIPS</div>
+        <div class="guide-tip">📥 <strong>XLSX export:</strong> Yellow header, styled — directly client ko bhej sakte ho</div>
+        <div class="guide-tip">📤 <strong>Import Log export:</strong> Database tab mein "Export Log" button — CSV download hoti hai with all errors</div>
+        <div class="guide-tip">🔒 <strong>Data privacy:</strong> Sab kuch aapke device pe — koi data server pe nahi jaata</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Guide CSS inline -->
+<style>
+.guide-tab{flex:1;padding:10px 4px;border:none;background:transparent;color:var(--muted);font-family:var(--font);font-size:9px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.5px}
+.guide-tab.active{color:var(--g);border-bottom-color:var(--g);background:#0a1220}
+.guide-tip{padding:8px 12px;margin-bottom:6px;background:var(--card2);border-left:3px solid var(--g);border-radius:0 6px 6px 0;font-size:11px;color:var(--text);line-height:1.7}
+</style>
+<script>
+// ============================================================
+// STATE & CONSTANTS
+// ============================================================
+let allC = [];          // All creators in memory
+let brFiltered = [];    // Filtered browse list
+let brPage = 1;         // Current browse page
+let lastS = [];         // Last shortlist results
+let lastB = [];         // Last brief-based shortlist
+let parsedB = {};       // Parsed brief data
+let idb = null;         // IndexedDB reference
+let aiEnabled = false;  // AI toggle state
+
+const PS = 50;                   // Page size for browse
+const DB_NAME = 'CreatorAgentDB';
+const DB_VER = 1;
+const STORE = 'creators';
+const MANUAL_KEY = 'ca_manual_v3';
+const ERR_KEY = 'ca_errors_v3';
+const AI_KEY = 'ca_ai_enabled';
+const GROQ_KEY = 'ca_groq_key';
+
+// Sheets to skip when parsing Excel files
+const SKIP_SHEETS = new Set([
+  'summary','tool data','vendor list','requirement','sheet1',
+  'sheet52','kesh king','recco','unfold condoms','raymond',
+  'barter','overview','dashboard','readme','instructions'
+]);
+
+// ============================================================
+// INDEXEDDB SETUP
+// ============================================================
+
+/** Open (or create) the IndexedDB database. */
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = e => { idb = e.target.result; resolve(idb); };
+    req.onerror = () => reject(req.error);
+    req.onblocked = () => reject(new Error('IndexedDB blocked'));
+  });
+}
+
+/** Save entire creator array to IndexedDB. */
+function idbSave(data) {
+  return new Promise((resolve, reject) => {
+    if (!idb) return reject(new Error('DB not open'));
+    const tx = idb.transaction(STORE, 'readwrite');
+    const store = tx.objectStore(STORE);
+    store.clear();
+    // Remove id before saving so autoIncrement works
+    data.forEach(c => {
+      const item = { ...c };
+      delete item.id;
+      store.add(item);
+    });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/** Load all creators from IndexedDB. */
+function idbLoad() {
+  return new Promise((resolve, reject) => {
+    if (!idb) return resolve([]);
+    const tx = idb.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ============================================================
+// INIT — Entry point, wrapped in try/catch for stability
+// ============================================================
+async function init() {
+  try {
+    // Open IndexedDB
+    await openDB();
+
+    // Load persisted creators
+    const stored = await idbLoad().catch(() => []);
+    if (stored && stored.length > 0) {
+      allC = stored;
+    }
+
+    // Merge manually-added creators (stored in localStorage)
+    try {
+      const manual = JSON.parse(localStorage.getItem(MANUAL_KEY) || '[]');
+      const existingNames = new Set(allC.map(c => c.name.toLowerCase().trim()));
+      manual.forEach(c => {
+        if (c.name && !existingNames.has(c.name.toLowerCase().trim())) {
+          allC.push({ ...c, source: 'Manual' });
+        }
+      });
+    } catch (e) { /* corrupted manual data — skip */ }
+
+    brFiltered = [...allC];
+    updateUI();
+    renderErrors();
+
+    // Restore AI state
+    aiEnabled = localStorage.getItem(AI_KEY) === 'true';
+    applyAIState();
+
+    // Restore saved API key
+    const savedKey = localStorage.getItem(GROQ_KEY) || '';
+    if (savedKey) {
+      const el = document.getElementById('api-key');
+      if (el) el.value = savedKey;
+    }
+
+    log('App initialized — ' + allC.length + ' creators loaded');
+  } catch (e) {
+    logError('init', e.message, 'Application initialization failed');
+    // Show degraded state
+    document.getElementById('db-count').textContent = 'Error on init — tap Database to reload';
+  }
+}
+
+// ============================================================
+// UI UPDATE
+// ============================================================
+function updateUI() {
+  const cnt = allC.length;
+  document.getElementById('db-count').textContent = cnt.toLocaleString() + ' creators';
+  document.getElementById('db-total').textContent = cnt.toLocaleString();
+  document.getElementById('db-manual').textContent = allC.filter(c => c.source === 'Manual').length;
+  document.getElementById('db-sources').textContent =
+    new Set(allC.map(c => (c.source || '').split('|')[0].trim())).size;
+
+  const noDb = document.getElementById('no-db-msg');
+  const form = document.getElementById('shortlist-form');
+  if (noDb) noDb.style.display = cnt === 0 ? 'block' : 'none';
+  if (form) form.style.display = cnt === 0 ? 'none' : 'block';
+}
+
+// ============================================================
+// IMPORT LOG — detailed, exportable
+// ============================================================
+let importLogEntries = []; // { time, type, msg } — for export
+
+function importLog(msg, type) {
+  const box = document.getElementById('import-debug');
+  const logEl = document.getElementById('import-debug-log');
+  if (!box || !logEl) return;
+  box.style.display = 'block';
+
+  const colors = { ok: '#00e5a0', warn: '#f59e0b', err: '#ff4e6a', info: '#4da6ff', dim: '#3a4d65' };
+  const color = colors[type] || colors.dim;
+  const time = new Date().toLocaleTimeString('en-IN');
+  importLogEntries.push({ time, type: type||'info', msg });
+
+  logEl.innerHTML += `<div style="color:${color}"><span style="color:#2a3d55;margin-right:6px">${time}</span>${msg}</div>`;
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function clearImportLog() {
+  const box = document.getElementById('import-debug');
+  const logEl = document.getElementById('import-debug-log');
+  if (box) box.style.display = 'none';
+  if (logEl) logEl.innerHTML = '';
+  importLogEntries = [];
+}
+
+function exportImportLog() {
+  if (!importLogEntries.length) { alert('No import log to export.'); return; }
+  const headers = ['Time','Type','Message'];
+  const rows = importLogEntries.map(e => [e.time, e.type, e.msg].map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  dlBlob(blob, 'import_log_' + ts + '.csv');
+}
+
+// ============================================================
+// FILE LOADING — ZIP support + crash-proof + full logging
+// ============================================================
+
+function yieldToBrowser() {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
+/**
+ * Entry point — handles .xlsx/.xls/.csv files AND .zip archives.
+ * ZIP files are unpacked in-browser using a built-in DecompressionStream approach
+ * (via JSZip loaded from CDN, lazy-loaded only when a .zip is detected).
+ */
+async function loadFiles(files) {
+  if (!files || files.length === 0) return;
+
+  if (typeof XLSX === 'undefined') {
+    showLoadMsg('SheetJS library not loaded. Please check your internet connection and refresh.', 'err');
+    return;
+  }
+
+  const progress = document.getElementById('load-progress');
+  const bar = document.getElementById('load-bar');
+  const status = document.getElementById('load-status');
+  progress.style.display = 'block';
+  bar.style.width = '0%';
+  clearImportLog();
+
+  const ts = new Date().toLocaleString('en-IN');
+  importLog(`═══ IMPORT STARTED: ${ts} ═══`, 'info');
+  importLog(`Files selected: ${files.length}`, 'info');
+
+  // ── PHASE 1: Flatten files — unzip if needed ──────────────
+  let flatFiles = []; // { name, data: ArrayBuffer, fromZip }
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const ext = file.name.split('.').pop().toLowerCase();
+    status.textContent = `Reading ${i+1}/${files.length}: ${file.name}`;
+    bar.style.width = ((i / files.length) * 15) + '%';
+    await yieldToBrowser();
+
+    try {
+      const data = await file.arrayBuffer();
+
+      if (ext === 'zip') {
+        importLog(`📦 ZIP detected: ${file.name} — extracting...`, 'info');
+        const extracted = await unzipFile(data, file.name);
+        importLog(`   └─ Extracted ${extracted.length} file(s) from ZIP`, extracted.length > 0 ? 'ok' : 'warn');
+        flatFiles.push(...extracted);
+      } else if (['xlsx','xls','csv'].includes(ext)) {
+        flatFiles.push({ name: file.name, data, fromZip: false });
+      } else {
+        importLog(`⚠ Skipped (unsupported type): ${file.name}`, 'warn');
+      }
+    } catch (e) {
+      importLog(`✗ Could not read: ${file.name} — ${e.message}`, 'err');
+      logError('file_read', e.message, file.name);
+    }
+  }
+
+  importLog(`─── Total files to process: ${flatFiles.length} ───`, 'info');
+
+  // ── PHASE 2: Process each file ────────────────────────────
+  const newCreators = [];
+  let processedFiles = 0;
+
+  for (const { name: fname, data, fromZip } of flatFiles) {
+    const ext = fname.split('.').pop().toLowerCase();
+    const src = fname.replace(/\.(xlsx|xls|csv)$/i, '');
+    const zipNote = fromZip ? ' [from ZIP]' : '';
+
+    status.textContent = `Processing: ${fname}`;
+    bar.style.width = (15 + (processedFiles / Math.max(flatFiles.length, 1)) * 70) + '%';
+    await yieldToBrowser();
+
+    importLog(``, 'dim');
+    importLog(`📄 FILE: ${fname}${zipNote}`, 'info');
+
+    try {
+      if (ext === 'csv') {
+        const text = new TextDecoder('utf-8', { fatal: false }).decode(data);
+        const csvRows = parseCSVText(text);
+        const dataRows = csvRows.length - 1;
+        importLog(`   Format: CSV | Rows: ${dataRows}`, 'info');
+
+        if (csvRows.length > 1) {
+          const headers = csvRows[0];
+          importLog(`   Columns (${headers.length}): ${headers.slice(0,8).filter(h=>h).join(', ')}${headers.length > 8 ? '...' : ''}`, 'dim');
+          let added = 0;
+          for (let r = 1; r < csvRows.length; r++) {
+            const row = {};
+            headers.forEach((h, idx) => { row[h] = csvRows[r][idx] || ''; });
+            const c = parseCreatorRow(row, src, 'CSV');
+            if (c) { newCreators.push(c); added++; }
+          }
+          importLog(`   ✓ Parsed: ${added} creators`, added > 0 ? 'ok' : 'warn');
+          if (added === 0) importLog(`   ↳ No "Name" column found. Check column names.`, 'err');
+        } else {
+          importLog(`   ⚠ CSV has no data rows`, 'warn');
+        }
+
+      } else {
+        // XLSX / XLS
+        let wb;
+        try {
+          wb = XLSX.read(new Uint8Array(data), { type: 'array' });
+        } catch (e) {
+          importLog(`   ✗ Could not parse XLSX: ${e.message}`, 'err');
+          logError('xlsx_parse', e.message, fname);
+          processedFiles++;
+          continue;
+        }
+
+        const validSheets = wb.SheetNames.filter(s => !SKIP_SHEETS.has(s.toLowerCase().trim()));
+        importLog(`   Sheets total: ${wb.SheetNames.length} | Processable: ${validSheets.length}`, 'info');
+        if (wb.SheetNames.length > validSheets.length) {
+          const skipped = wb.SheetNames.filter(s => SKIP_SHEETS.has(s.toLowerCase().trim()));
+          importLog(`   Skipped sheets: ${skipped.join(', ')}`, 'dim');
+        }
+
+        for (const sheetName of validSheets) {
+          status.textContent = `"${sheetName}" in ${fname}`;
+          await yieldToBrowser();
+
+          try {
+            const sheet = wb.Sheets[sheetName];
+            if (!sheet || !sheet['!ref']) {
+              importLog(`   ├─ "${sheetName}" — EMPTY, skipped`, 'warn');
+              continue;
+            }
+
+            const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: false, blankrows: false });
+
+            if (!rawRows || rawRows.length < 2) {
+              importLog(`   ├─ "${sheetName}" — Only ${rawRows?.length||0} row(s), skipped`, 'warn');
+              continue;
+            }
+
+            // Detect structure
+            const { headerRowIdx, colMap, score } = detectSheetStructure(rawRows);
+            const mappedFields = Object.keys(colMap);
+            const headerRow = rawRows[headerRowIdx] || [];
+            const detectedColNames = mappedFields.map(f => {
+              const ci = colMap[f];
+              return `${f}→"${String(headerRow[ci]||'').trim()}"`;
+            });
+
+            importLog(`   ├─ "${sheetName}" | Rows: ${rawRows.length} | Header at row ${headerRowIdx+1} | Score: ${score}`, 'info');
+            importLog(`   │  Mapped: ${detectedColNames.join(', ')||'NONE'}`, detectedColNames.length > 0 ? 'dim' : 'err');
+
+            // Show all columns found (for debugging)
+            const allCols = headerRow.filter(h => String(h||'').trim()).map(h => String(h).trim());
+            if (allCols.length > 0) {
+              importLog(`   │  All columns found: ${allCols.slice(0,10).join(', ')}${allCols.length > 10 ? ` (+${allCols.length-10} more)` : ''}`, 'dim');
+            }
+
+            const sheetCreators = parseSheetRows(rawRows, src, sheetName.trim());
+
+            if (sheetCreators.length === 0) {
+              importLog(`   ├─ "${sheetName}" — ✗ 0 creators extracted`, 'err');
+              importLog(`   │  REASON: ${mappedFields.includes('name') ? 'Name column found but no valid names' : 'No name column detected'}`, 'err');
+              importLog(`   │  FIX: Rename creator column to "Name" or "Creator"`, 'warn');
+            } else {
+              importLog(`   ├─ "${sheetName}" — ✓ ${sheetCreators.length} creators extracted`, 'ok');
+            }
+
+            for (const c of sheetCreators) newCreators.push(c);
+
+          } catch (e) {
+            importLog(`   ├─ "${sheetName}" — ERROR: ${e.message}`, 'err');
+            logError('sheet_parse', e.message, `"${sheetName}" in ${fname}`);
+          }
+        }
+      }
+    } catch (e) {
+      importLog(`   ✗ FAILED: ${e.message}`, 'err');
+      logError('file_load', e.message, fname);
+    }
+
+    processedFiles++;
+  }
+
+  // ── PHASE 3: Deduplicate ──────────────────────────────────
+  importLog(``, 'dim');
+  importLog(`─── Deduplicating ${newCreators.length} records...`, 'info');
+  status.textContent = `Deduplicating ${newCreators.length} records...`;
+  bar.style.width = '88%';
+  await yieldToBrowser();
+
+  const seen = new Set(allC.map(c => normalizeKey(c.name)));
+  let dupCount = 0;
+  const added = [];
+  for (const c of newCreators) {
+    if (!c || !c.name) continue;
+    const key = normalizeKey(c.name);
+    if (seen.has(key)) { dupCount++; continue; }
+    seen.add(key);
+    added.push(c);
+  }
+  importLog(`   New: ${added.length} | Duplicates removed: ${dupCount}`, dupCount > 0 ? 'warn' : 'ok');
+
+  allC = [
+    ...allC.filter(c => c.source !== 'Manual'),
+    ...added,
+    ...allC.filter(c => c.source === 'Manual')
+  ];
+
+  // ── PHASE 4: Save ─────────────────────────────────────────
+  status.textContent = 'Saving to device...';
+  bar.style.width = '94%';
+  await yieldToBrowser();
+  try {
+    await idbSaveBatched(allC.filter(c => c.source !== 'Manual'));
+    importLog(`   Saved to IndexedDB ✓`, 'ok');
+  } catch (e) {
+    importLog(`   ⚠ IndexedDB save failed — data available this session only`, 'warn');
+    logError('idb_save', e.message, 'IndexedDB save failed');
+  }
+
+  bar.style.width = '100%';
+  status.textContent = '✅ Import complete!';
+  setTimeout(() => { progress.style.display = 'none'; }, 3000);
+
+  brFiltered = [...allC];
+  updateUI();
+
+  const finalMsg = `═══ DONE: ${added.length} added | ${dupCount} duplicates | Total DB: ${allC.length.toLocaleString()} ═══`;
+  importLog(``, 'dim');
+  importLog(finalMsg, 'ok');
+
+  let msg = `✅ ${added.length} creators added`;
+  if (dupCount > 0) msg += ` | ${dupCount} duplicates removed`;
+  msg += ` | Total: ${allC.length.toLocaleString()}`;
+  showLoadMsg(msg, added.length > 0 ? 'ok' : 'warn');
+}
+
+// ============================================================
+// ZIP EXTRACTOR — pure browser, no server needed
+// Lazy-loads JSZip from CDN only when a .zip is uploaded
+// ============================================================
+async function unzipFile(arrayBuffer, zipName) {
+  // Lazy-load JSZip
+  if (typeof JSZip === 'undefined') {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('Could not load JSZip. Check internet connection.'));
+      document.head.appendChild(s);
+    });
+  }
+
+  const zip = await JSZip.loadAsync(arrayBuffer);
+  const results = [];
+
+  for (const [path, zipEntry] of Object.entries(zip.files)) {
+    if (zipEntry.dir) continue;
+    const fname = path.split('/').pop(); // get filename without folder path
+    if (!fname) continue;
+    const ext = fname.split('.').pop().toLowerCase();
+    if (!['xlsx','xls','csv'].includes(ext)) continue;
+    if (fname.startsWith('~$') || fname.startsWith('.')) continue; // skip temp files
+
+    try {
+      importLog(`   ├─ Extracting: ${fname}`, 'dim');
+      const data = await zipEntry.async('arraybuffer');
+      results.push({ name: fname, data, fromZip: true });
+    } catch (e) {
+      importLog(`   ├─ ✗ Failed to extract: ${fname} — ${e.message}`, 'err');
+    }
+  }
+  return results;
+}
+
+/** Normalize a name for deduplication comparison */
+function normalizeKey(name) {
+  return String(name||'')
+    .toLowerCase().trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[^a-z0-9 ]/g, '');
+}
+
+/**
+ * Save to IndexedDB — single transaction.
+ */
+function idbSaveBatched(data) {
+  return new Promise((resolve, reject) => {
+    if (!idb) return reject(new Error('DB not open'));
+    const tx = idb.transaction(STORE, 'readwrite');
+    const store = tx.objectStore(STORE);
+    store.clear();
+    for (const c of data) {
+      const item = { ...c };
+      delete item.id;
+      store.add(item);
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(new Error('Transaction aborted'));
+  });
+}
+
+// ============================================================
+// UNIVERSAL SHEET PARSER
+// Strategy:
+//  1. Scan ALL rows (up to 15) to find the best header row
+//  2. Map columns intelligently using keyword scoring
+//  3. If no "Name" column found, use the first text-heavy column as name
+//  4. Fallback: treat each non-empty cell in a row as a name if no structure detected
+// ============================================================
+
+/** All possible keyword patterns for each field */
+const FIELD_PATTERNS = {
+  name:          ['name','creator','influencer','handle','artist','talent','profile','account','content creator','ig name','insta name'],
+  niche:         ['niche','type','category','vertical','genre','content type','creator type','segment'],
+  insta_link:    ['insta link','ig link','instagram link','instagram url','insta url','ig url','instagram','insta','ig profile','profile link','link'],
+  insta_followers:['ig follower','insta follower','instagram follower','follower count','followers','ig reach','insta reach','ig fan'],
+  yt_link:       ['yt link','youtube link','yt url','youtube url','yt channel','youtube channel','youtube','yt profile'],
+  yt_subscribers:['yt sub','youtube sub','subscriber','yt reach','youtube reach'],
+  gender:        ['gender','sex','male/female'],
+  location:      ['location','city','state','region','place','based','based in','country','geo'],
+  contact:       ['contact','phone','mobile','whatsapp','wp','number','contact number','ph no'],
+  email:         ['email','e-mail','mail','gmail'],
+  cost:          ['cost','rate','price','charges','budget','reel cost','per reel','cost/reel','our cost','fee','cost per reel'],
+  cost_date:     ['cost date','rate date','price date','cost as of','rate as of','quoted on','cost month','rate month'],
+  poc_name:      ['poc name','poc','contact person','manager name','talent manager','person','point of contact'],
+  poc_agency:    ['poc agency','agency','manager agency','talent agency','management','mgmt'],
+  last_contacted:['last contacted','last contact','contacted on','last talk','last spoke','contacted date'],
+  status:        ['status','conversation status','deal status','progress','stage','current status'],
+  notes:         ['note','remark','comment','additional','info','description','other']
+};
+
+/**
+ * Score a header string against a field's keywords.
+ * Returns 0-100 confidence score.
+ */
+function scoreHeader(headerStr, fieldPatterns) {
+  const h = String(headerStr||'').toLowerCase().trim();
+  if (!h) return 0;
+  for (const p of fieldPatterns) {
+    if (h === p) return 100;           // exact match
+    if (h.includes(p)) return 80;     // contains full pattern
+    if (p.includes(h)) return 60;     // pattern contains header
+    // word-level partial
+    const words = p.split(' ');
+    if (words.some(w => w.length > 3 && h.includes(w))) return 40;
+  }
+  return 0;
+}
+
+/**
+ * Find the best header row index in rawRows.
+ * Scans up to row 15. Returns { headerRowIdx, colMap }
+ * colMap = { fieldName: colIndex }
+ */
+function detectSheetStructure(rawRows) {
+  let bestScore = 0;
+  let bestRowIdx = 0;
+  let bestColMap = {};
+
+  const scanLimit = Math.min(15, rawRows.length);
+
+  for (let ri = 0; ri < scanLimit; ri++) {
+    const row = rawRows[ri];
+    if (!row || row.every(v => !v)) continue;
+
+    // Try to map each column to a field
+    const colMap = {};
+    const usedCols = new Set();
+    let rowScore = 0;
+
+    for (const [field, patterns] of Object.entries(FIELD_PATTERNS)) {
+      let bestColScore = 0;
+      let bestCol = -1;
+      for (let ci = 0; ci < row.length; ci++) {
+        if (usedCols.has(ci)) continue;
+        const s = scoreHeader(row[ci], patterns);
+        if (s > bestColScore) { bestColScore = s; bestCol = ci; }
+      }
+      if (bestColScore >= 40 && bestCol >= 0) {
+        colMap[field] = bestCol;
+        usedCols.add(bestCol);
+        rowScore += bestColScore;
+      }
+    }
+
+    if (rowScore > bestScore) {
+      bestScore = rowScore;
+      bestRowIdx = ri;
+      bestColMap = colMap;
+    }
+  }
+
+  return { headerRowIdx: bestRowIdx, colMap: bestColMap, score: bestScore };
+}
+
+/**
+ * Parse a sheet using detected column mapping.
+ * Falls back gracefully if no clear structure found.
+ */
+function parseSheetRows(rawRows, src, sheetName) {
+  const results = [];
+  if (!rawRows || rawRows.length < 2) return results;
+
+  const { headerRowIdx, colMap, score } = detectSheetStructure(rawRows);
+
+  importLog(`    Structure score: ${score} | Header at row ${headerRowIdx + 1} | Mapped: ${Object.keys(colMap).join(', ')}`, 'info');
+
+  // If no name column found at all, try to auto-detect the "most name-like" column
+  // (first column with mostly text strings, not numbers/links)
+  if (colMap.name === undefined) {
+    const headerRow = rawRows[headerRowIdx] || [];
+    // Find first col where majority of data rows have text values (not numbers, not URLs)
+    for (let ci = 0; ci < (headerRow.length || 10); ci++) {
+      const sample = rawRows.slice(headerRowIdx + 1, headerRowIdx + 11)
+        .map(r => r ? String(r[ci]||'').trim() : '');
+      const textCount = sample.filter(v =>
+        v && v.length > 1 && v.length < 60 &&
+        !v.startsWith('http') &&
+        !/^\d+$/.test(v) &&
+        !['na','n/a','-','none','null'].includes(v.toLowerCase())
+      ).length;
+      if (textCount >= 3) {
+        colMap.name = ci;
+        importLog(`    No "Name" column found — using column ${ci + 1} ("${headerRow[ci] || 'unnamed'}") as name`, 'warn');
+        break;
+      }
+    }
+  }
+
+  if (colMap.name === undefined) {
+    importLog(`    ⚠ Could not detect name column — sheet skipped`, 'err');
+    return results;
+  }
+
+  const dataRows = rawRows.slice(headerRowIdx + 1);
+
+  /** Extract value from a row by colMap field */
+  function getCol(row, field) {
+    const ci = colMap[field];
+    if (ci === undefined || ci === null) return '';
+    const v = row[ci];
+    return v !== undefined && v !== null ? String(v).trim() : '';
+  }
+
+  for (const row of dataRows) {
+    if (!row || row.every(v => v === null || v === undefined || v === '')) continue;
+
+    const name = getCol(row, 'name');
+    if (!name || name.length < 2) continue;
+    const nameLower = name.toLowerCase();
+    // Skip header-like or junk values
+    if (['name','creator','influencer','nan','-','n/a','na','#n/a','null','s.no','sr','sr no',
+         'sno','s.no.','serial','serial no','#'].includes(nameLower)) continue;
+    if (/^\d+$/.test(name)) continue; // pure number = row index, skip
+
+    results.push({
+      name,
+      niche:            getCol(row, 'niche') || sheetName,
+      insta_link:       getCol(row, 'insta_link'),
+      insta_followers:  pf(getCol(row, 'insta_followers')),
+      yt_link:          getCol(row, 'yt_link'),
+      yt_subscribers:   pf(getCol(row, 'yt_subscribers')),
+      gender:           getCol(row, 'gender'),
+      location:         getCol(row, 'location'),
+      contact:          getCol(row, 'contact'),
+      email:            getCol(row, 'email'),
+      cost:             getCol(row, 'cost'),
+      cost_date:        getCol(row, 'cost_date'),
+      poc_name:         getCol(row, 'poc_name'),
+      poc_agency:       getCol(row, 'poc_agency'),
+      last_contacted:   getCol(row, 'last_contacted'),
+      status:           getCol(row, 'status'),
+      notes:            getCol(row, 'notes'),
+      source:           src + ' | ' + sheetName
+    });
+  }
+
+  return results;
+}
+
+/** Legacy single-row parser (kept for CSV fallback) */
+function parseCreatorRow(row, src, sheet) {
+  const keys = Object.keys(row);
+  const lmap = {};
+  keys.forEach(k => { lmap[String(k).toLowerCase().trim()] = k; });
+
+  function get(...candidates) {
+    for (const c of candidates) {
+      if (row[c] !== undefined && String(row[c]).trim() !== '') return cl(row[c]);
+      const lc = c.toLowerCase().trim();
+      if (lmap[lc] !== undefined && String(row[lmap[lc]]).trim() !== '') return cl(row[lmap[lc]]);
+      const partialKey = Object.keys(lmap).find(k => k.includes(lc) || lc.includes(k));
+      if (partialKey && String(row[lmap[partialKey]]).trim() !== '') return cl(row[lmap[partialKey]]);
+    }
+    return '';
+  }
+
+  const name = get('Name','name','Creator Name','Creator','CREATOR NAME','CREATOR',
+                   'Influencer','influencer name','Content Creator','Artist','Handle');
+  if (!name || name.length < 2) return null;
+  const nl = name.toLowerCase();
+  if (['name','nan','-','n/a','na','#n/a','null','undefined','s.no','sr','sr.','serial no'].includes(nl)) return null;
+
+  return {
+    name,
+    niche:           get('Niche','Type','Category','NICHE','Content Type','Vertical') || sheet,
+    insta_link:      get('Insta Link','IG Link','Instagram Link','Instagram','Link','Profile Link','Insta','IG'),
+    insta_followers: pf(get('Followers','IG Followers','Follower','Instagram Followers','Insta Followers')),
+    yt_link:         get('YT Link','Yt Link','YouTube Link','Youtube','YOUTUBE','YT'),
+    yt_subscribers:  pf(get('Subscribers','YT Subscribers','YouTube Subscribers','YT Subs')),
+    gender:          get('Gender','GENDER','Sex'),
+    location:        get('Location','City','State','Country','Place','Region','Based In'),
+    contact:         get('Contact','Contact & name','Phone','Mobile','WhatsApp','Phone No'),
+    email:           get('Email','EMAIL','E-mail','Mail'),
+    cost:            get('Cost','Our Cost 1 Reel','COST','Rate','Price','Charges','Reel Cost'),
+    er:              get('ER%','Reel ER%','Engagement Rate','ER','Engagement'),
+    notes:           get('Notes','NOTES','Remarks','Comments','Additional Info'),
+    source:          src + ' | ' + sheet
+  };
+}
+
+/** Simple CSV text parser (handles quoted fields). */
+function parseCSVText(text) {
+  const lines = text.trim().split(/\r?\n/);
+  return lines.map(line => {
+    const result = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        result.push(cur.trim()); cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur.trim());
+    return result;
+  });
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  loadFiles(e.dataTransfer.files);
+}
+
+function showLoadMsg(txt, type) {
+  const el = document.getElementById('load-msg');
+  if (!el) return;
+  el.className = 'msg msg-' + type;
+  el.textContent = txt;
+  setTimeout(() => { el.textContent = ''; el.className = ''; }, 8000);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+/** Clean/trim a value to string. */
+function cl(v) { return (v === null || v === undefined) ? '' : String(v).trim(); }
+
+/** Parse follower count strings like "50K", "1.2M", "3L". */
+function pf(v) {
+  if (!v) return 0;
+  const s = String(v).replace(/,/g, '').replace(/\s/g, '').toUpperCase();
+  try {
+    if (s.includes('K')) return Math.round(parseFloat(s) * 1000);
+    if (s.includes('M')) return Math.round(parseFloat(s) * 1000000);
+    if (s.includes('L')) return Math.round(parseFloat(s) * 100000);
+    return parseInt(s) || 0;
+  } catch { return 0; }
+}
+
+/** Format follower number for display. */
+function ff(n) {
+  if (!n || n === 0) return '-';
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n;
+}
+
+/** Score color. */
+function sc(s) { return s >= 70 ? '#00e5a0' : s >= 40 ? '#f59e0b' : '#ff4e6a'; }
+
+/** Render platform link buttons for a creator. */
+function lnk(c) {
+  let h = '';
+  if (c.insta_link && c.insta_link.startsWith('http')) {
+    h += `<a class="ig-btn" href="${c.insta_link}" target="_blank" rel="noopener">📸 IG</a>`;
+  } else if (c.insta_followers > 0) {
+    h += `<span class="bdg bdg-ig">IG</span>`;
+  }
+  if (c.yt_link && c.yt_link.startsWith('http')) {
+    h += `<a class="yt-btn" href="${c.yt_link}" target="_blank" rel="noopener">▶ YT</a>`;
+  } else if (c.yt_subscribers > 0) {
+    h += `<span class="bdg bdg-yt">YT</span>`;
+  }
+  return h || '<span style="color:#2a3550;font-size:10px">—</span>';
+}
+
+/** Render a table row for shortlist (with checkbox). */
+function mkRowCheck(c, i) {
+  const s = c._score;
+  const idx = i - 1; // 0-based index into lastS
+  return `<tr>
+    <td class="chk"><input type="checkbox" class="row-chk" data-idx="${idx}" onchange="updateSelCount()"></td>
+    <td style="color:var(--muted)">${i}</td>
+    <td style="font-weight:600;min-width:110px">${c.name || '—'}</td>
+    <td style="min-width:80px">${lnk(c)}</td>
+    <td style="color:var(--muted);font-size:10px">${(c.niche||'—').substring(0,22)}</td>
+    <td style="color:var(--muted);font-size:10px">${c.location||'—'}</td>
+    <td style="color:var(--g);font-weight:700">${ff(c.insta_followers)}</td>
+    <td style="color:var(--muted);font-size:10px">${ff(c.yt_subscribers)}</td>
+    <td style="font-size:10px;color:var(--muted)">${c.contact||c.email||'—'}</td>
+    <td style="font-size:10px;color:var(--yellow)">${c.cost?'₹'+c.cost:'—'}</td>
+    <td class="score-cell">
+      <div class="sbar"><div class="sfill" style="width:${s}%;background:${sc(s)}"></div></div>
+      <span style="color:${sc(s)};font-size:10px;font-weight:700">${s}%</span>
+    </td>
+  </tr>`;
+}
+
+/** Render a table row without checkbox. */
+function mkRow(c, i) {
+  const s = c._score;
+  return `<tr>
+    <td style="color:var(--muted)">${i}</td>
+    <td style="font-weight:600;min-width:110px">${c.name||'—'}</td>
+    <td style="min-width:80px">${lnk(c)}</td>
+    <td style="color:var(--muted);font-size:10px">${(c.niche||'—').substring(0,22)}</td>
+    <td style="color:var(--muted);font-size:10px">${c.location||'—'}</td>
+    <td style="color:var(--g);font-weight:700">${ff(c.insta_followers)}</td>
+    <td style="color:var(--muted);font-size:10px">${ff(c.yt_subscribers)}</td>
+    <td style="font-size:10px;color:var(--muted)">${c.contact||c.email||'—'}</td>
+    <td style="font-size:10px;color:var(--yellow)">${c.cost?'₹'+c.cost:'—'}</td>
+    <td class="score-cell">
+      <div class="sbar"><div class="sfill" style="width:${s}%;background:${sc(s)}"></div></div>
+      <span style="color:${sc(s)};font-size:10px;font-weight:700">${s}%</span>
+    </td>
+  </tr>`;
+}
+
+function esc(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// ============================================================
+// SCORING ENGINE
+// ============================================================
+
+/**
+ * Score a creator against brief criteria.
+ * Returns 0 if any hard filter fails (niche, location, followers, platform, gender).
+ */
+function calcScore(c, b) {
+  let s = 0;
+  const ni = (c.niche||'').toLowerCase();
+  const lo = (c.location||'').toLowerCase();
+  const nm = (c.name||'').toLowerCase();
+  const no = (c.notes||'').toLowerCase();
+  const ge = (c.gender||'').toLowerCase();
+  const igF = c.insta_followers || 0;
+  const ytS = c.yt_subscribers || 0;
+
+  // Niche match (hard if niches selected)
+  if (b.niches && b.niches.length > 0) {
+    if (!b.niches.some(n => ni.includes(n.toLowerCase()))) return 0;
+    s += 40;
+  } else {
+    s += 15;
+  }
+
+  // Keyword match
+  if (b.kw) {
+    const k = b.kw.toLowerCase();
+    if (ni.includes(k) || nm.includes(k) || no.includes(k)) s += 20;
+  } else {
+    s += 8;
+  }
+
+  // Location match (hard filter if specified)
+  if (b.loc) {
+    const locs = b.loc.toLowerCase().split(',').map(x => x.trim()).filter(x => x);
+    if (locs.length > 0 && !locs.some(l => lo.includes(l))) return 0;
+    s += 20;
+  } else {
+    s += 8;
+  }
+
+  // Follower range (hard filter if specified)
+  if (b.minF || b.maxF) {
+    const mn = b.minF || 0;
+    const mx = b.maxF || 999999999;
+    if (igF > 0 && (igF < mn || igF > mx)) return 0;
+    if (igF >= mn && igF <= mx) s += 15;
+  } else {
+    s += 8;
+  }
+
+  // Platform filter (hard)
+  if (b.plat === 'Instagram' && igF === 0 && !c.insta_link) return 0;
+  if (b.plat === 'YouTube' && ytS === 0) return 0;
+  if (b.plat === 'Both' && (igF === 0 || ytS === 0)) return 0;
+
+  // Gender filter
+  if (b.gen && ge) {
+    if (ge.charAt(0) !== b.gen.charAt(0).toLowerCase()) return 0;
+    s += 5;
+  } else {
+    s += 3;
+  }
+
+  return Math.min(s, 100);
+}
+
+// ============================================================
+// SHORTLIST
+// ============================================================
+function runShortlist() {
+  try {
+    const sel = document.getElementById('b-niche');
+    const niches = [...sel.selectedOptions].map(o => o.value).filter(v => v);
+    const b = {
+      niches,
+      plat: document.getElementById('b-plat').value,
+      gen: document.getElementById('b-gen').value,
+      loc: document.getElementById('b-loc').value.trim(),
+      minF: parseInt(document.getElementById('b-minf').value) || 0,
+      maxF: parseInt(document.getElementById('b-maxf').value) || 0,
+      kw: document.getElementById('b-kw').value.trim()
+    };
+
+    const results = allC
+      .map(c => ({ ...c, _score: calcScore(c, b) }))
+      .filter(c => c._score > 10)
+      .sort((a, x) => x._score - a._score)
+      .slice(0, 100);
+
+    lastS = results;
+    document.getElementById('s-db').textContent = allC.length.toLocaleString();
+    document.getElementById('s-match').textContent = results.length;
+    document.getElementById('s-top').textContent = results[0] ? results[0]._score + '%' : '—';
+    document.getElementById('s-body').innerHTML = results.length
+      ? results.map((c, i) => mkRowCheck(c, i + 1)).join('')
+      : '<tr><td colspan="11" class="empty">No creators matched the selected criteria.</td></tr>';
+
+    document.getElementById('chk-all').checked = false;
+    updateSelCount();
+    document.getElementById('s-out').style.display = 'block';
+    document.getElementById('s-out').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    logError('shortlist', e.message, 'Shortlist generation failed');
+    alert('Shortlist error: ' + e.message);
+  }
+}
+
+// ============================================================
+// SELECTION SYSTEM
+// ============================================================
+function updateSelCount() {
+  const checked = document.querySelectorAll('.row-chk:checked').length;
+  const total = document.querySelectorAll('.row-chk').length;
+  const info = document.getElementById('sel-info');
+  if (info) info.textContent = `${checked} of ${total} creators selected`;
+}
+
+function selectAll(checked) {
+  document.querySelectorAll('.row-chk').forEach(cb => { cb.checked = checked; });
+  updateSelCount();
+}
+
+let _selAllState = false;
+function toggleSelectAll() {
+  _selAllState = !_selAllState;
+  selectAll(_selAllState);
+  const allChk = document.getElementById('chk-all');
+  if (allChk) allChk.checked = _selAllState;
+}
+
+function exportSelected() {
+  const checked = [...document.querySelectorAll('.row-chk:checked')];
+  if (checked.length === 0) {
+    alert('No creators selected.\n\nTick the checkboxes next to creators you want to export, then click Export Selected.');
+    return;
+  }
+  // Use data-idx attribute (row index in lastS) for precise matching
+  const indices = new Set(checked.map(cb => parseInt(cb.dataset.idx)));
+  const selected = lastS.filter((_, i) => indices.has(i));
+  if (selected.length === 0) {
+    alert('Selection error — please re-run the shortlist and try again.');
+    return;
+  }
+  exportXLSX(selected, 'selected_creators');
+}
+
+// ============================================================
+// BRIEF PARSER
+// ============================================================
+async function parseAI() {
+  if (!aiEnabled) {
+    alert('AI is disabled. Enable it in Settings → AI Configuration.');
+    return;
+  }
+  if (!localStorage.getItem(GROQ_KEY)) {
+    alert('No API key configured. Go to Settings → AI Configuration.');
+    return;
+  }
+  const txt = document.getElementById('brief-txt').value.trim();
+  if (!txt) { alert('Please paste a brief first.'); return; }
+
+  const btn = document.getElementById('ai-parse-btn');
+  btn.innerHTML = '<span class="spin"></span>Parsing...';
+  btn.disabled = true;
+
+  try {
+    const raw = await callAI(
+      `You are extracting campaign details from a marketing brief. The brief may be in English, Hindi, Hinglish, or Marathi.
+
+IMPORTANT RULES:
+- "brand" = the company/product name mentioned at the start or as the subject (e.g. "raymond brief" → brand is "Raymond", NOT "instagram")
+- "platform" = Instagram/YouTube/Both — NOT a brand name
+- If someone says "mumabi" or "mumba" they mean "Mumbai" — fix typos
+- Creator count (e.g. "need 10 creators") is NOT a field here — just extract the 9 fields below
+- Detect gender from words like "male", "female", "ladka", "ladki", "men", "women"
+
+Return ONLY valid JSON (no markdown, no explanation) with exactly these keys:
+brand (string - company/product name, NOT platform name),
+niche (array of strings),
+platform (Instagram/YouTube/Both or empty string),
+location (comma-separated Indian cities, fix typos like mumabi→Mumbai),
+min_followers (integer or 0),
+max_followers (integer or 0),
+gender (Male/Female or empty string),
+budget_per_reel (string or empty),
+deliverables (string or empty)
+
+Brief:
+${txt}`, 400);
+
+    let p;
+    try { p = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch(e) {
+      const m = raw.match(/\{[\s\S]*\}/);
+      p = m ? JSON.parse(m[0]) : {};
+    }
+    // Post-process: if brand looks like a platform name, fix it
+    if (p.brand && ['instagram','youtube','facebook','twitter','snapchat'].includes(p.brand.toLowerCase())) {
+      p.brand = '';
+    }
+    showParsed(p);
+  } catch (e) {
+    logError('ai_parse', e.message, 'AI brief parsing failed');
+    alert('AI Error: ' + e.message + '\n\nTry "Quick Parse (Offline)" instead.');
+  } finally {
+    btn.innerHTML = '🤖 AI Parse';
+    btn.disabled = false;
+  }
+}
+
+function parseLocal() {
+  const txt = document.getElementById('brief-txt').value.trim();
+  if (!txt) { alert('Please paste a brief first.'); return; }
+
+  // Normalize — handle Hinglish, mixed case, typos
+  const t = txt.toLowerCase()
+    .replace(/mumabi|mumbi|mumbai/g, 'mumbai')   // common typo fix
+    .replace(/bangalor[eu]?/g, 'bangalore')
+    .replace(/bengaluru/g, 'bangalore')
+    .replace(/\bkol\b/g, 'kolkata');
+
+  // ── Brand detection: first word / phrase before "brief" or "campaign" or "for" ──
+  let brand = '';
+  const brandPatterns = [
+    /^([A-Za-z0-9 &]+?)\s+(?:brief|campaign|ke liye|ke lie|wali|wala|brand|client)/i,
+    /(?:brand|client|for|campaign)\s*[:\-]?\s*([A-Za-z0-9 &]+)/i,
+    /^([A-Za-z0-9]+)/i  // fallback: first word
+  ];
+  for (const p of brandPatterns) {
+    const m = txt.match(p);
+    if (m && m[1] && m[1].trim().length > 1) {
+      brand = m[1].trim().split('\n')[0];
+      break;
+    }
+  }
+
+  // ── Niche — English + Hinglish variants ──
+  const nicheMap = {
+    fashion: ['fashion','fashun','kapde','style wala','styling'],
+    beauty: ['beauty','beauti','makeup','makeupwali','cosmetic'],
+    lifestyle: ['lifestyle','life style'],
+    travel: ['travel','travelling','ghoomna','ghumna'],
+    fitness: ['fitness','gym','workout','fit'],
+    food: ['food','khana','cooking','chef'],
+    finance: ['finance','money','paisa','investment'],
+    tech: ['tech','technology','gadget'],
+    gaming: ['gaming','gamer','game'],
+    comedy: ['comedy','funny','humor'],
+    skincare: ['skincare','skin care','skin'],
+    music: ['music','singer','song'],
+    dance: ['dance','dancing'],
+    sports: ['sports','cricket','football'],
+    parenting: ['parenting','mom','dad','baby'],
+    education: ['education','learning','teaching'],
+  };
+  const ni = [];
+  for (const [niche, keywords] of Object.entries(nicheMap)) {
+    if (keywords.some(k => t.includes(k))) ni.push(niche);
+  }
+
+  // ── Platform ──
+  let pl = '';
+  if ((t.includes('instagram')||t.includes('insta')||t.includes('ig')) && (t.includes('youtube')||t.includes('yt'))) pl = 'Both';
+  else if (t.includes('instagram')||t.includes('insta')||t.includes('ig')) pl = 'Instagram';
+  else if (t.includes('youtube')||t.includes('yt')) pl = 'YouTube';
+
+  // ── Gender — English + Hinglish ──
+  let ge = '';
+  if (t.includes('female')||t.includes('women')||t.includes('girl')||t.includes('ladki')||t.includes('aurat')) ge = 'Female';
+  else if (t.includes('male')||t.includes('men')||t.includes('ladka')||t.includes('aadmi')||t.includes('boy')) ge = 'Male';
+
+  // ── Follower range ──
+  const fm = txt.match(/(\d+\.?\d*)\s*[kK]\s*[-–to ]+\s*(\d+\.?\d*)\s*([kKmM])/);
+  let mn = 0, mx = 0;
+  if (fm) {
+    mn = parseFloat(fm[1]) * 1000;
+    mx = fm[3].toLowerCase() === 'm' ? parseFloat(fm[2]) * 1000000 : parseFloat(fm[2]) * 1000;
+  }
+
+  // ── Creator count ──
+  const countMatch = txt.match(/\b(\d+)\s*(?:creator|influencer|talent|profile|account)/i);
+  if (countMatch) {
+    const el = document.getElementById('b-count');
+    if (el && !el.value) el.value = countMatch[1];
+  }
+
+  // ── Location — Indian cities + Hinglish ──
+  const cityMap = {
+    'Mumbai': ['mumbai','bombay','bambaiya','bambaai','mumba'],
+    'Delhi': ['delhi','dilli','new delhi'],
+    'Bangalore': ['bangalore','bengaluru','blr','bang'],
+    'Hyderabad': ['hyderabad','hyd'],
+    'Pune': ['pune','poona'],
+    'Chennai': ['chennai','madras'],
+    'Kolkata': ['kolkata','calcutta','kolkatta'],
+    'Lucknow': ['lucknow','lko'],
+    'Jaipur': ['jaipur','pink city'],
+    'Ahmedabad': ['ahmedabad','amdavad'],
+    'Chandigarh': ['chandigarh','chd'],
+    'Surat': ['surat'],
+    'Indore': ['indore'],
+    'Gurgaon': ['gurgaon','gurugram'],
+    'Noida': ['noida'],
+  };
+  const foundCities = [];
+  for (const [city, variants] of Object.entries(cityMap)) {
+    if (variants.some(v => t.includes(v))) foundCities.push(city);
+  }
+  const lo = foundCities.join(', ');
+
+  // ── Budget ──
+  const budgetM = txt.match(/(?:budget|cost|rate|paisa|paise|rs|₹)\s*[:\-]?\s*([\d,k₹ \-–]+)/i);
+  const delivM  = txt.match(/(?:deliverable|deliver|format|chahiye|chaiye|kaam)\s*[:\-]?\s*(.+)/i);
+
+  showParsed({
+    brand,
+    niche: ni,
+    platform: pl,
+    location: lo,
+    min_followers: mn,
+    max_followers: mx,
+    gender: ge,
+    budget_per_reel: budgetM ? budgetM[1].trim() : '',
+    deliverables: delivM ? delivM[1].trim().split('\n')[0] : ''
+  });
+}
+
+function showParsed(d) {
+  parsedB = d;
+  const na = v => v ? `<span class="pv">${v}</span>` : `<span class="pv na">Not Mentioned</span>`;
+  const fields = [
+    ['Brand',         d.brand || ''],
+    ['Niche',         Array.isArray(d.niche) ? d.niche.join(', ') : (d.niche||'')],
+    ['Platform',      d.platform || 'All'],
+    ['Location',      d.location || 'Any'],
+    ['Min Followers', d.min_followers ? Number(d.min_followers).toLocaleString() : ''],
+    ['Max Followers', d.max_followers ? Number(d.max_followers).toLocaleString() : ''],
+    ['Gender',        d.gender || 'Any'],
+    ['Budget / Reel', d.budget_per_reel || ''],
+    ['Deliverables',  d.deliverables || '']
+  ];
+  document.getElementById('parsed-fields').innerHTML = fields.map(([k,v]) =>
+    `<div class="pf"><span class="pk">${k}</span>${na(v)}</div>`
+  ).join('');
+  document.getElementById('parsed-box').style.display = 'block';
+}
+
+function briefShortlist() {
+  const d = parsedB;
+  const ni = Array.isArray(d.niche) ? d.niche : (d.niche ? [d.niche] : []);
+  const b = {
+    niches: ni, plat: d.platform||'', gen: d.gender||'',
+    loc: d.location||'', minF: parseInt(d.min_followers)||0,
+    maxF: parseInt(d.max_followers)||0, kw: ''
+  };
+
+  // Respect count input
+  const countEl = document.getElementById('b-count');
+  const limit = (countEl && parseInt(countEl.value) > 0) ? parseInt(countEl.value) : 100;
+
+  const r = allC
+    .map(c => ({ ...c, _score: calcScore(c, b) }))
+    .filter(c => c._score > 10)
+    .sort((a, x) => x._score - a._score)
+    .slice(0, limit);
+
+  lastB = r;
+  document.getElementById('b-db').textContent = allC.length.toLocaleString();
+  document.getElementById('b-match').textContent = r.length;
+  document.getElementById('b-top').textContent = r[0] ? r[0]._score + '%' : '—';
+
+  // Use checkbox rows
+  document.getElementById('b-body').innerHTML = r.length
+    ? r.map((c, i) => mkBriefRowCheck(c, i, i+1)).join('')
+    : '<tr><td colspan="11" class="empty">No creators matched this brief.</td></tr>';
+
+  const bChkAll = document.getElementById('b-chk-all');
+  if (bChkAll) bChkAll.checked = false;
+  updateBriefSelCount();
+
+  document.getElementById('b-out').style.display = 'block';
+  document.getElementById('b-out').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── Brief result checkbox rows ──
+function mkBriefRowCheck(c, idx, sr) {
+  const s = c._score;
+  return `<tr>
+    <td class="chk"><input type="checkbox" class="b-row-chk" data-idx="${idx}" onchange="updateBriefSelCount()"></td>
+    <td style="color:var(--muted)">${sr}</td>
+    <td style="font-weight:600;min-width:110px">${c.name||'—'}</td>
+    <td style="min-width:80px">${lnk(c)}</td>
+    <td style="color:var(--muted);font-size:10px">${(c.niche||'—').substring(0,22)}</td>
+    <td style="color:var(--muted);font-size:10px">${c.location||'—'}</td>
+    <td style="color:var(--g);font-weight:700">${ff(c.insta_followers)}</td>
+    <td style="color:var(--muted);font-size:10px">${ff(c.yt_subscribers)}</td>
+    <td style="font-size:10px;color:var(--muted)">${c.contact||c.email||'—'}</td>
+    <td style="font-size:10px;color:var(--yellow)">${c.cost?'₹'+c.cost:'—'}</td>
+    <td class="score-cell">
+      <div class="sbar"><div class="sfill" style="width:${s}%;background:${sc(s)}"></div></div>
+      <span style="color:${sc(s)};font-size:10px;font-weight:700">${s}%</span>
+    </td>
+  </tr>`;
+}
+
+function updateBriefSelCount() {
+  const checked = document.querySelectorAll('.b-row-chk:checked').length;
+  const total   = document.querySelectorAll('.b-row-chk').length;
+  const el = document.getElementById('b-sel-info');
+  if (el) el.textContent = `${checked} of ${total} creators selected`;
+}
+
+function briefSelectAll(checked) {
+  document.querySelectorAll('.b-row-chk').forEach(cb => { cb.checked = checked; });
+  updateBriefSelCount();
+}
+
+let _briefSelAll = false;
+function toggleBriefSelectAll() {
+  _briefSelAll = !_briefSelAll;
+  briefSelectAll(_briefSelAll);
+  const el = document.getElementById('b-chk-all');
+  if (el) el.checked = _briefSelAll;
+}
+
+function exportBriefSelected() {
+  const checked = [...document.querySelectorAll('.b-row-chk:checked')];
+  if (checked.length === 0) {
+    alert('No creators selected.\n\nTick checkboxes next to the creators you want, then click Export Selected.');
+    return;
+  }
+  const indices = new Set(checked.map(cb => parseInt(cb.dataset.idx)));
+  const selected = lastB.filter((_, i) => indices.has(i));
+  exportXLSX(selected, 'brief_selected_creators');
+}
+
+// ============================================================
+// BROWSE
+// ============================================================
+function brFilter() {
+  const q = document.getElementById('br-q').value.toLowerCase();
+  const ni = document.getElementById('br-ni').value.toLowerCase();
+  const lo = document.getElementById('br-lo').value.toLowerCase();
+  const pl = document.getElementById('br-pl').value;
+  brFiltered = allC.filter(c => {
+    const nm = (c.name||'').toLowerCase();
+    const nc = (c.niche||'').toLowerCase();
+    const lc = (c.location||'').toLowerCase();
+    if (q && !nm.includes(q) && !nc.includes(q) && !lc.includes(q)) return false;
+    if (ni && !nc.includes(ni)) return false;
+    if (lo && !lc.includes(lo)) return false;
+    if (pl === 'Instagram' && !(c.insta_followers > 0 || c.insta_link)) return false;
+    if (pl === 'YouTube' && !c.yt_subscribers) return false;
+    return true;
+  });
+  brPage = 1;
+  renderBrowse();
+}
+
+function renderBrowse() {
+  const st = (brPage - 1) * PS;
+  const pg = brFiltered.slice(st, st + PS);
+  document.getElementById('br-count').textContent =
+    brFiltered.length.toLocaleString() + ' creators found';
+  document.getElementById('br-body').innerHTML = pg.length
+    ? pg.map(c => `<tr>
+        <td style="font-weight:600;min-width:110px">${c.name||'—'}</td>
+        <td>${lnk(c)}</td>
+        <td style="color:var(--muted);font-size:10px">${(c.niche||'—').substring(0,22)}</td>
+        <td style="color:var(--muted);font-size:10px">${c.location||'—'}</td>
+        <td style="color:var(--g);font-weight:700">${ff(c.insta_followers)}</td>
+        <td style="color:var(--muted);font-size:10px">${ff(c.yt_subscribers)}</td>
+        <td style="font-size:10px;color:var(--muted)">${c.contact||'—'}</td>
+        <td style="font-size:10px;color:var(--yellow)">${c.cost?'₹'+c.cost:'—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" class="empty">No results found.</td></tr>';
+
+  const tot = Math.ceil(brFiltered.length / PS) || 1;
+  document.getElementById('pg-info').textContent =
+    'Page ' + brPage + ' of ' + tot + ' (' + brFiltered.length.toLocaleString() + ' total)';
+}
+
+function pgChange(d) {
+  const tot = Math.ceil(brFiltered.length / PS) || 1;
+  brPage = Math.max(1, Math.min(tot, brPage + d));
+  renderBrowse();
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// ADD CREATOR MANUALLY
+// ============================================================
+async function addCreator() {
+  const nm = document.getElementById('a-nm').value.trim();
+  if (!nm) { showMsg('add-msg', 'Name is required.', 'err'); return; }
+  if (allC.find(c => c.name.toLowerCase() === nm.toLowerCase())) {
+    showMsg('add-msg', 'A creator with this name already exists.', 'warn');
+    return;
+  }
+  const c = {
+    name: nm,
+    niche: document.getElementById('a-ni').value.trim(),
+    insta_link: document.getElementById('a-il').value.trim(),
+    insta_followers: parseInt(document.getElementById('a-if').value) || 0,
+    yt_link: document.getElementById('a-yl').value.trim(),
+    yt_subscribers: parseInt(document.getElementById('a-ys').value) || 0,
+    location: document.getElementById('a-lo').value.trim(),
+    gender: document.getElementById('a-ge').value,
+    cost: document.getElementById('a-co').value.trim(),
+    contact: document.getElementById('a-ct').value.trim(),
+    email: document.getElementById('a-em').value.trim(),
+    notes: document.getElementById('a-no').value.trim(),
+    source: 'Manual',
+    added_on: new Date().toLocaleDateString('en-IN')
+  };
+
+  try {
+    const manual = JSON.parse(localStorage.getItem(MANUAL_KEY) || '[]');
+    manual.push(c);
+    localStorage.setItem(MANUAL_KEY, JSON.stringify(manual));
+  } catch (e) { /* localStorage full — skip */ }
+
+  allC.push(c);
+  brFiltered = [...allC];
+  updateUI();
+  showMsg('add-msg', '✅ ' + nm + ' added to database.', 'ok');
+  ['a-nm','a-ni','a-il','a-if','a-yl','a-ys','a-lo','a-co','a-ct','a-em','a-no']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+async function clearDB() {
+  if (!confirm('This will permanently delete all imported data and manual entries. Continue?')) return;
+  try {
+    const tx = idb.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).clear();
+  } catch (e) { /* ignore */ }
+  localStorage.removeItem(MANUAL_KEY);
+  allC = [];
+  brFiltered = [];
+  renderBrowse();
+  updateUI();
+  alert('Database cleared successfully.');
+}
+
+// ============================================================
+// EXPORT: CSV
+// ============================================================
+function exportCSV(data, name) {
+  try {
+    const headers = ['SR','Name','Niche','IG Link','IG Followers','YT Link','YT Subscribers',
+      'Gender','Location','Contact','Email','Cost Per Reel','Cost Date',
+      'POC Name','POC Agency','Last Contacted','Status','Notes','Source'];
+    const rows = data.map((c, i) => [
+      i+1, c.name, c.niche, c.insta_link,
+      c.insta_followers||'', c.yt_link, c.yt_subscribers||'',
+      c.gender, c.location, c.contact, c.email,
+      c.cost, c.cost_date||'', c.poc_name||'', c.poc_agency||'',
+      c.last_contacted||'', c.status||'', c.notes, c.source
+    ].map(v => `"${(v||'NA').toString().replace(/"/g,'""')}"`).join(','));
+
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+    const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    dlBlob(blob, name + '_' + ts + '.csv');
+  } catch (e) {
+    logError('export_csv', e.message, 'CSV export failed');
+    alert('CSV export error: ' + e.message);
+  }
+}
+
+// ============================================================
+// EXPORT: STYLED XLSX
+// ============================================================
+function exportXLSX(data, name) {
+  if (typeof XLSX === 'undefined') {
+    alert('SheetJS library is not loaded. Please check your internet connection and try again.');
+    return;
+  }
+  try {
+    const headers = ['SR','Name','Niche','IG Link','IG Followers','YT Link','YT Subscribers',
+      'Gender','Location','Contact','Email','Cost Per Reel','Cost Date',
+      'POC Name','POC Agency','Last Contacted','Status','Notes','Source'];
+
+    const rows = data.map((c, i) => [
+      i+1,
+      c.name||'NA', c.niche||'NA', c.insta_link||'NA',
+      c.insta_followers||'NA', c.yt_link||'NA', c.yt_subscribers||'NA',
+      c.gender||'NA', c.location||'NA', c.contact||'NA',
+      c.email||'NA', c.cost||'NA', c.cost_date||'NA',
+      c.poc_name||'NA', c.poc_agency||'NA',
+      c.last_contacted||'NA', c.status||'NA',
+      c.notes||'NA', c.source||'NA'
+    ]);
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+    ws['!cols'] = [
+      {wch:5},{wch:25},{wch:15},{wch:35},{wch:14},{wch:35},{wch:14},
+      {wch:10},{wch:15},{wch:18},{wch:25},{wch:14},{wch:12},
+      {wch:18},{wch:18},{wch:16},{wch:14},{wch:25},{wch:20}
+    ];
+
+    // Style header row — bold + yellow background
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cell = ws[XLSX.utils.encode_cell({ r: 0, c: C })];
+      if (!cell) continue;
+      cell.s = {
+        font: { bold: true, color: { rgb: '000000' }, sz: 11 },
+        fill: { fgColor: { rgb: 'FFD700' }, patternType: 'solid' },
+        alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+        border: {
+          bottom: { style: 'medium', color: { rgb: '888800' } }
+        }
+      };
+    }
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Creators');
+
+    const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    const fname = name + '_' + ts + '.xlsx';
+    XLSX.writeFile(wb, fname, { bookType: 'xlsx', type: 'binary', cellStyles: true });
+  } catch (e) {
+    logError('export_xlsx', e.message, 'XLSX export failed');
+    // Fallback to CSV
+    alert('XLSX export failed — falling back to CSV.\n' + e.message);
+    exportCSV(data, name);
+  }
+}
+
+/** Trigger file download from a Blob. */
+function dlBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ============================================================
+// AI TOGGLE & CONFIG
+// ============================================================
+function toggleAI() {
+  aiEnabled = !aiEnabled;
+  localStorage.setItem(AI_KEY, aiEnabled);
+  applyAIState();
+}
+
+function onAIToggle() {
+  aiEnabled = document.getElementById('ai-toggle').checked;
+  localStorage.setItem(AI_KEY, aiEnabled);
+  applyAIState();
+}
+
+function onProviderChange() {
+  const p = document.getElementById('ai-provider')?.value;
+  const customUrl = document.getElementById('custom-url-row');
+  const customModel = document.getElementById('custom-model-row');
+  if (customUrl) customUrl.style.display = p === 'custom' ? 'block' : 'none';
+  if (customModel) customModel.style.display = p === 'custom' ? 'block' : 'none';
+  localStorage.setItem('ca_ai_provider', p||'groq');
+}
+
+function applyAIState() {
+  const badge = document.getElementById('ai-badge');
+  const toggle = document.getElementById('ai-toggle');
+  const apiSection = document.getElementById('api-section');
+  badge.textContent = aiEnabled ? 'AI ON' : 'AI OFF';
+  badge.className = 'ai-badge ' + (aiEnabled ? 'ai-on' : 'ai-off');
+  if (toggle) toggle.checked = aiEnabled;
+  if (apiSection) apiSection.style.display = aiEnabled ? 'block' : 'none';
+  // Restore saved provider
+  const savedProvider = localStorage.getItem('ca_ai_provider') || 'groq';
+  const providerEl = document.getElementById('ai-provider');
+  if (providerEl) { providerEl.value = savedProvider; onProviderChange(); }
+}
+
+// ============================================================
+// SETTINGS — saveKey
+// ============================================================
+function saveKey() {
+  const k = document.getElementById('api-key')?.value.trim() || '';
+  const p = document.getElementById('ai-provider')?.value || 'groq';
+  const cu = document.getElementById('custom-url')?.value.trim() || '';
+  const cm = document.getElementById('custom-model')?.value.trim() || '';
+  localStorage.setItem(GROQ_KEY, k);  // reuse key store
+  localStorage.setItem('ca_ai_provider', p);
+  if (cu) localStorage.setItem('ca_custom_url', cu);
+  if (cm) localStorage.setItem('ca_custom_model', cm);
+  alert(k ? '✅ API configuration saved.' : 'Configuration cleared.');
+}
+
+/**
+ * Universal AI call — works with Groq, OpenAI, Anthropic, or custom endpoint.
+ * All use OpenAI-compatible /v1/chat/completions format except Anthropic.
+ */
+async function callAI(prompt, maxTokens = 400) {
+  const apiKey = localStorage.getItem(GROQ_KEY) || '';
+  if (!apiKey) throw new Error('No API key configured. Go to Settings → AI Configuration.');
+
+  const provider = localStorage.getItem('ca_ai_provider') || 'groq';
+  const customUrl = localStorage.getItem('ca_custom_url') || '';
+  const customModel = localStorage.getItem('ca_custom_model') || '';
+
+  // Anthropic uses different API format
+  if (provider === 'anthropic') {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    return d.content?.[0]?.text || '';
+  }
+
+  // OpenAI-compatible (Groq, OpenAI, custom)
+  const endpoints = {
+    groq:   'https://api.groq.com/openai/v1/chat/completions',
+    openai: 'https://api.openai.com/v1/chat/completions',
+    custom: customUrl || 'https://api.openai.com/v1/chat/completions'
+  };
+  const models = {
+    groq:   'llama3-8b-8192',
+    openai: 'gpt-4o-mini',
+    custom: customModel || 'gpt-4o-mini'
+  };
+
+  const url = endpoints[provider] || endpoints.openai;
+  const model = models[provider] || models.openai;
+
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+    body: JSON.stringify({
+      model, max_tokens: maxTokens, temperature: 0.1,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message || JSON.stringify(d.error));
+  return d.choices?.[0]?.message?.content || '';
+}
+
+// ============================================================
+// SUPPORT ASSISTANT — Hindi / Hinglish / Marathi / English
+// ============================================================
+async function runSupport() {
+  const txt = document.getElementById('support-txt').value.trim();
+  if (!txt) { alert('Please describe your issue / apni problem likho.'); return; }
+
+  const out = document.getElementById('support-out');
+  const result = document.getElementById('support-result');
+  out.style.display = 'block';
+  result.innerHTML = '<span class="spin"></span> Analyzing / Dekh raha hoon...';
+
+  if (!aiEnabled || !localStorage.getItem(GROQ_KEY)) {
+    result.innerHTML = offlineSupport(txt);
+    return;
+  }
+
+  try {
+    const fix = await callAI(
+      `You are a support assistant for a browser-based influencer/creator shortlisting tool.
+The user may write in English, Hindi, Hinglish, or Marathi — understand all of them.
+Tool features: upload Excel/CSV/ZIP files, auto-detect columns, shortlist creators, export XLSX/CSV.
+
+User's issue: "${txt}"
+
+Respond in the SAME language the user used (if Hinglish → reply Hinglish, Hindi → Hindi, English → English).
+Give 2-3 short practical steps. No markdown, plain text only.`, 250);
+    result.innerHTML = fix ? fix.replace(/\n/g,'<br>') : offlineSupport(txt);
+  } catch (e) {
+    result.innerHTML = offlineSupport(txt) + `<br><br><span style="color:var(--red);font-size:10px">AI error: ${e.message}</span>`;
+  }
+}
+
+function offlineSupport(txt) {
+  const t = txt.toLowerCase();
+
+  // Hinglish / Hindi keywords mapped to topics
+  const isFileIssue   = /load|upload|excel|file|nahi|nhi|chal|read|add|import|sheet|xlsx|csv|zip|khul|open/.test(t);
+  const isShortlist   = /shortlist|result|filter|0 creator|match|nahi mila|nhi mila|dikha|show|list/.test(t);
+  const isExport      = /export|download|save|nikal|file nahi|csv|xlsx/.test(t);
+  const isSelect      = /select|checkbox|tick|check|choose|chuno|pasand/.test(t);
+
+  if (isSelect) {
+    return 'Shortlist generate karne ke baad:<br>1. Har creator ke left side mein checkbox hoga — tick karo<br>2. "Select All" se sab ek baar mein select ho jayenge<br>3. "Export Selected" button se sirf selected creators ki XLSX download hogi';
+  }
+  if (isFileIssue) {
+    return '1. File .xlsx, .xls, .csv ya .zip honi chahiye<br>2. Upload ke baad Import Log dekho — wahan exact reason hoga<br>3. Ek file ek baar try karo pehle<br>4. Page refresh karke dobara try karo';
+  }
+  if (isShortlist) {
+    return '1. Pehle Database tab mein creators load karo<br>2. Filters thoda loose karo — location ya followers hata ke try karo<br>3. Browse tab mein dekho data aaya hai ya nahi';
+  }
+  if (isExport) {
+    return '1. Browser mein downloads allow karo (address bar ke paas allow karo)<br>2. XLSX fail ho toh CSV try karo<br>3. Pop-up blocker OFF karo browser mein';
+  }
+  return '1. Page refresh karo aur dobara try karo<br>2. Browse tab mein dekho data visible hai ya nahi<br>3. Settings mein Error Log clear karo aur file dobara import karo';
+}
+
+function showMsg(id, txt, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'msg msg-' + type;
+  el.textContent = txt;
+  setTimeout(() => { el.textContent = ''; el.className = ''; }, 5000);
+}
+
+// ============================================================
+// ERROR LOG
+// ============================================================
+function logError(type, msg, context) {
+  try {
+    const errors = JSON.parse(localStorage.getItem(ERR_KEY) || '[]');
+    const entry = {
+      id: Date.now(), type, msg, context,
+      time: new Date().toLocaleString('en-IN'), fixed: false
+    };
+    errors.push(entry);
+    if (errors.length > 50) errors.splice(0, errors.length - 50);
+    localStorage.setItem(ERR_KEY, JSON.stringify(errors));
+    renderErrors();
+  } catch (e) { /* storage error — silently ignore */ }
+  console.error('[CreatorAgent]', type, msg, context);
+}
+
+function renderErrors() {
+  try {
+    const errors = JSON.parse(localStorage.getItem(ERR_KEY) || '[]');
+    const countEl = document.getElementById('err-count');
+    if (countEl) countEl.textContent = errors.length;
+
+    const log = document.getElementById('heal-log');
+    if (!log) return;
+
+    if (!errors.length) {
+      log.innerHTML = '<div class="empty">No errors — everything is running smoothly ✅</div>';
+      return;
+    }
+
+    log.innerHTML = errors.slice().reverse().map(e => `
+      <div class="log-item">
+        <div class="log-time">${e.time} | ${e.type}</div>
+        <div class="log-err">❌ ${e.context || e.msg}</div>
+        <div class="log-pending">Details: ${e.msg}</div>
+      </div>`).join('');
+  } catch (e) { /* ignore */ }
+}
+
+function clearErrors() {
+  localStorage.removeItem(ERR_KEY);
+  renderErrors();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  const pg = document.getElementById('pg-' + name);
+  const nav = document.getElementById('nav-' + name);
+  if (pg) pg.classList.add('active');
+  if (nav) nav.classList.add('active');
+  if (name === 'browse') { brFiltered = [...allC]; renderBrowse(); }
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// GUIDE — slide switcher
+// ============================================================
+function switchGuide(idx) {
+  for (let i = 0; i < 4; i++) {
+    const slide = document.getElementById('gslide-' + i);
+    const tab = document.getElementById('gtab-' + i);
+    if (slide) slide.style.display = i === idx ? 'block' : 'none';
+    if (tab) tab.classList.toggle('active', i === idx);
+  }
+}
+
+// ============================================================
+// WHATSAPP → AI PROMPT GENERATOR
+// ============================================================
+function generateAIPrompt() {
+  const raw = document.getElementById('wa-input').value.trim();
+  if (!raw) { alert('Pehle message paste karo.'); return; }
+
+  const prompt = `You are a campaign brief structuring assistant for an influencer marketing tool.
+
+A user has sent the following raw message (it may be in English, Hindi, Hinglish, or Marathi):
+
+"${raw}"
+
+Please extract and return a structured campaign brief in ENGLISH with exactly these fields:
+- Brand Name: (company/product name)
+- Niche: (content category e.g. Fashion, Beauty, Fitness, Food, Tech etc.)
+- Platform: (Instagram / YouTube / Both)
+- Location: (Indian city names, comma separated)
+- Number of Creators Needed: (integer)
+- Gender: (Male / Female / Any)
+- Min Followers: (number or "Not Mentioned")
+- Max Followers: (number or "Not Mentioned")
+- Budget Per Reel: (amount in ₹ or "Not Mentioned")
+- Deliverables: (what content they need to post, or "Not Mentioned")
+- Additional Notes: (anything else relevant)
+
+If any field is unclear or not mentioned, write "NA" for that field.
+Return ONLY the structured brief, no extra explanation.`;
+
+  document.getElementById('wa-prompt-box').textContent = prompt;
+  document.getElementById('wa-out').style.display = 'block';
+  document.getElementById('wa-out').scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyPrompt() {
+  const text = document.getElementById('wa-prompt-box').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const msg = document.getElementById('wa-copy-msg');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const msg = document.getElementById('wa-copy-msg');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  });
+}
+
+// ============================================================
+// UTILITY
+// ============================================================
+function log(msg) { console.log('[CreatorAgent]', msg); }
+
+// ============================================================
+// START — Deferred to ensure DOM is ready
+// ============================================================
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  setTimeout(init, 0);
+}
+</script>
+</body>
+</html>
