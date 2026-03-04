@@ -330,13 +330,307 @@ input:checked + .slider::before{transform:translateX(18px);background:var(--g)}
 .feedback-fab:hover{transform:scale(1.1)}
 .btn-wa{background:#25d366;color:#fff}
 .btn-blue{background:#1565c0;color:#fff}
+
+/* ============================================================
+   WELCOME SPLASH SCREEN
+============================================================ */
+#welcome-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(145deg,#030508,#060c1a,#040810);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;padding:30px;
+  animation:none;
+}
+#welcome-screen.hiding{animation:wFadeOut .6s ease forwards}
+@keyframes wFadeOut{to{opacity:0;transform:scale(.97);pointer-events:none}}
+.welcome-logo-ring{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid #00e5a040;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;position:relative;
+  box-shadow:0 0 40px #00e5a020;
+}
+.welcome-logo-ring::before{
+  content:'';position:absolute;inset:-6px;border-radius:50%;
+  border:1px solid #00e5a020;animation:ringPulse 2.5s ease-in-out infinite;
+}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.08);opacity:.1}}
+.welcome-logo-inner{font-size:28px}
+.welcome-title{color:var(--g);font-size:20px;letter-spacing:4px;font-weight:700;margin-bottom:4px;text-align:center}
+.welcome-sub{color:var(--muted);font-size:10px;letter-spacing:2px;text-align:center;margin-bottom:32px}
+.welcome-cards{width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.welcome-card{
+  background:#0b0f1a;border:1px solid #1a2135;border-radius:10px;
+  padding:14px 18px;display:flex;gap:14px;align-items:flex-start;
+}
+.welcome-card-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.welcome-card-title{color:var(--g);font-size:10px;letter-spacing:1.5px;font-weight:700;margin-bottom:4px}
+.welcome-card-desc{color:var(--muted);font-size:11px;line-height:1.7}
+.welcome-enter-btn{
+  background:linear-gradient(135deg,var(--g),var(--g2));
+  color:#000;border:none;border-radius:10px;
+  padding:15px 48px;font-family:var(--font);
+  font-size:12px;font-weight:700;letter-spacing:2px;
+  cursor:pointer;box-shadow:0 4px 20px #00e5a040;
+  transition:all .2s;
+}
+.welcome-enter-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px #00e5a055}
+.welcome-made-by{color:#2a3d55;font-size:9px;letter-spacing:1px;margin-top:18px;text-align:center}
+.welcome-version{color:#1e2d45;font-size:9px;margin-top:4px;text-align:center}
+
+/* ============================================================
+   FEEDBACK MODAL
+============================================================ */
+#feedback-modal{
+  position:fixed;inset:0;z-index:1000;
+  background:#000000b0;backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+#feedback-modal.open{display:flex}
+.fb-modal-box{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:14px;padding:24px;width:100%;max-width:420px;
+  animation:fadeIn .2s ease;
+}
+.fb-modal-hd{
+  color:var(--g);font-size:11px;letter-spacing:2.5px;font-weight:700;
+  margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;
+}
+.fb-modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px}
+.fb-modal-sub{color:var(--muted);font-size:10px;margin-bottom:20px;line-height:1.6}
+.fb-success{display:none;text-align:center;padding:20px 0}
+.fb-success-icon{font-size:40px;margin-bottom:10px}
+.fb-success-text{color:var(--g);font-size:12px;letter-spacing:1px;font-weight:700;margin-bottom:6px}
+.fb-success-sub{color:var(--muted);font-size:10px}
+
+/* ============================================================
+   ACCORDION / COLLAPSIBLE CARDS
+============================================================ */
+.acc-hd{
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  user-select:none;
+}
+.acc-hd::after{content:none!important}
+.acc-arrow{
+  font-size:10px;color:var(--muted);transition:transform .25s;
+  flex-shrink:0;margin-left:8px;
+}
+.acc-arrow.open{transform:rotate(180deg)}
+.acc-body{overflow:hidden;transition:max-height .3s ease,opacity .25s ease;max-height:2000px;opacity:1}
+.acc-body.collapsed{max-height:0;opacity:0}
+
+/* ============================================================
+   QUICK CREATOR SEARCH
+============================================================ */
+#creator-search-bar{position:relative;margin-bottom:14px}
+#creator-search-input{
+  padding-right:40px;margin-bottom:0;
+}
+#creator-search-clear{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;
+  display:none;
+}
+#search-results-panel{
+  background:var(--card2);border:1px solid var(--border2);
+  border-radius:8px;margin-top:6px;display:none;max-height:320px;overflow-y:auto;
+}
+.search-result-item{
+  padding:12px 14px;border-bottom:1px solid #0d1120;cursor:pointer;
+  transition:background .15s;
+}
+.search-result-item:last-child{border-bottom:none}
+.search-result-item:hover{background:#0c1020}
+.sri-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.sri-meta{font-size:10px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px}
+.sri-meta span{display:flex;align-items:center;gap:3px}
+.search-no-result{padding:20px;text-align:center;color:var(--muted);font-size:11px}
+
+/* ============================================================
+   CREATOR DETAIL MODAL
+============================================================ */
+#creator-detail-modal{
+  position:fixed;inset:0;z-index:800;
+  background:#000000b0;backdrop-filter:blur(4px);
+  display:none;align-items:flex-end;justify-content:center;padding:0;
+}
+#creator-detail-modal.open{display:flex}
+.cd-box{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:14px 14px 0 0;width:100%;max-width:600px;
+  padding:24px;max-height:85vh;overflow-y:auto;
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.cd-name{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px}
+.cd-niche{font-size:10px;color:var(--g);letter-spacing:1.5px;margin-bottom:16px}
+.cd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.cd-field{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:10px 12px}
+.cd-label{font-size:8px;color:var(--muted);letter-spacing:1.5px;margin-bottom:3px}
+.cd-value{font-size:12px;color:var(--text);word-break:break-all}
+.cd-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.setup-card{background:#0b0f1a;border:1px solid #1a2135;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.setup-card-hd{color:var(--g);font-size:10px;letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.setup-why{color:#2a4060;font-size:9px;margin-bottom:12px;line-height:1.6;border-left:2px solid #1a2d45;padding-left:8px}
+.tool-footer{position:fixed;bottom:72px;left:0;right:0;text-align:center;font-size:8px;color:#1a2640;letter-spacing:1px;pointer-events:none;z-index:1}
+.deliv-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.deliv-chip{background:#0b1020;border:1px solid #1a2d45;border-radius:20px;padding:4px 10px;font-size:9px;color:var(--muted);cursor:pointer;transition:all .15s;font-family:var(--font)}
+.deliv-chip.sel{background:#003d2a;border-color:var(--g);color:var(--g)}
+.deliv-cat{font-size:8px;color:#2a4060;letter-spacing:1.5px;margin:10px 0 6px;font-weight:700}
+.conf-mail-box{background:#04060e;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:11px;line-height:1.9;color:var(--text);white-space:pre-wrap;word-break:break-word;max-height:400px;overflow-y:auto;font-family:'Courier New',monospace}
 </style>
 </head>
 <body>
 
 <!-- ============================================================
-     HEADER
+     WELCOME SPLASH SCREEN (shown only first time)
 ============================================================ -->
+<div id="welcome-screen">
+  <div class="welcome-logo-ring">
+    <div class="welcome-logo-inner">⚡</div>
+  </div>
+  <div class="welcome-title">CREATOR AGENT</div>
+  <div class="welcome-sub">BY ILLUMINATI MEDIA</div>
+  <div class="welcome-cards">
+    <div class="welcome-card">
+      <div class="welcome-card-icon">🎯</div>
+      <div>
+        <div class="welcome-card-title">YEH TOOL KYA HAI?</div>
+        <div class="welcome-card-desc">Creator Agent ek influencer shortlisting tool hai — apna Excel/CSV database upload karo, campaign brief daalo, aur instantly best-fit creators shortlist ho jaate hain. Outreach messages bhi ek click mein ready.</div>
+      </div>
+    </div>
+    <div class="welcome-card">
+      <div class="welcome-card-icon">💡</div>
+      <div>
+        <div class="welcome-card-title">KYUN BANAYA GAYA?</div>
+        <div class="welcome-card-desc">Yeh tool specifically agency teams ke liye banaya gaya hai — manually creators dhundne ka time zyada tha. Ab 1000+ creators mein se seconds mein right creator nikalo, aur outreach bhi ek click mein.</div>
+      </div>
+    </div>
+    <div class="welcome-card">
+      <div class="welcome-card-icon">👥</div>
+      <div>
+        <div class="welcome-card-title">KISKE LIYE HAI?</div>
+        <div class="welcome-card-desc">Agency teams, brand managers, aur talent scouts ke liye. Offline-first — data sirf aapke device pe. Koi login nahi, koi subscription nahi.</div>
+      </div>
+    </div>
+  </div>
+  <button class="welcome-enter-btn" onclick="enterTool()">⚡ ENTER TOOL</button>
+  <div class="welcome-made-by" id="welcome-footer">Creator Agent Tool · v10.0</div>
+  <div class="welcome-version">Influencer Shortlisting & Outreach Platform</div>
+</div>
+
+<!-- ============================================================
+     SETUP SCREEN (shown after welcome, first time only)
+============================================================ -->
+<div id="setup-screen" style="display:none;position:fixed;inset:0;z-index:9998;background:#030508;overflow-y:auto;padding:24px 16px 100px">
+  <div style="max-width:520px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="color:var(--g);font-size:13px;letter-spacing:3px;font-weight:700;margin-bottom:6px">⚡ QUICK SETUP</div>
+      <div style="color:var(--muted);font-size:11px;line-height:1.8">Yeh details ek baar daalo — tool mein automatically use hongi.<br>Outreach messages, confirmation mails — sab mein aapki info auto-fill hogi.</div>
+    </div>
+
+    <!-- Step 1: Who are you -->
+    <div class="setup-card">
+      <div class="setup-card-hd">👤 AAPKE BAARE MEIN</div>
+      <div class="setup-why">Kyu zaroori: Outreach messages mein "From: [Your Name], [Agency]" automatically aayega.</div>
+      <div class="g2">
+        <div><label>AAPKA NAAM *</label><input id="setup-name" placeholder="Rahul Sharma" oninput="setupValidate()"></div>
+        <div><label>COMPANY / AGENCY *</label><input id="setup-company" placeholder="XYZ Media Agency" oninput="setupValidate()"></div>
+      </div>
+      <div class="g2">
+        <div><label>WHATSAPP / CONTACT</label><input id="setup-contact" placeholder="+91 98765 43210"></div>
+        <div><label>EMAIL ID</label><input id="setup-email" placeholder="you@agency.com"></div>
+      </div>
+    </div>
+
+    <!-- Step 2: Payment Terms -->
+    <div class="setup-card">
+      <div class="setup-card-hd">💳 PAYMENT TERMS (Default)</div>
+      <div class="setup-why">Kyu zaroori: Confirmation mails mein payment terms auto-fill honge. Har campaign ke liye override kar sakte ho.</div>
+      <div class="g2">
+        <div>
+          <label>PAYMENT CYCLE</label>
+          <select id="setup-payment-days" style="margin-bottom:0">
+            <option value="30">30 days from invoice</option>
+            <option value="45" selected>45 days from invoice</option>
+            <option value="60">60 days from invoice</option>
+            <option value="90">90 days from invoice</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div><label>CUSTOM (if above = Custom)</label><input id="setup-payment-custom" placeholder="e.g. 45 days from video share"></div>
+      </div>
+      <div class="g2">
+        <div>
+          <label>TDS DEDUCTION?</label>
+          <select id="setup-tds">
+            <option value="yes">Yes — TDS will be deducted</option>
+            <option value="no">No TDS</option>
+          </select>
+        </div>
+        <div><label>CC EMAIL (for mails)</label><input id="setup-cc" placeholder="accounts@agency.com"></div>
+      </div>
+    </div>
+
+    <!-- Step 3: Confirmation Mail Signature -->
+    <div class="setup-card">
+      <div class="setup-card-hd">✍️ MAIL SIGNATURE</div>
+      <div class="setup-why">Kyu zaroori: Confirmation mails ke end mein "Thank you, [Name] | [Agency]" aayega.</div>
+      <textarea id="setup-signature" rows="3" placeholder="Thank you!&#10;Rahul Sharma | XYZ Media Agency&#10;rahul@xyz.com | +91 98765 43210"></textarea>
+    </div>
+
+    <div id="setup-error" style="color:#ff6b6b;font-size:10px;text-align:center;margin-bottom:12px;display:none">⚠️ Naam aur Company required hain.</div>
+
+    <button class="welcome-enter-btn" id="setup-save-btn" onclick="saveSetupAndEnter()" style="width:100%;margin-bottom:12px">✅ Save & Enter Tool</button>
+    <div style="text-align:center">
+      <button onclick="skipSetup()" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;font-family:var(--font)">Skip for now — fill later in Settings</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="feedback-modal">
+  <div class="fb-modal-box">
+    <div class="fb-modal-hd">
+      💬 FEEDBACK / ISSUE REPORT
+      <button class="fb-modal-close" onclick="closeFeedbackModal()">✕</button>
+    </div>
+    <div class="fb-modal-sub">Apni problem ya feedback yahan likho — hum dekh lenge.</div>
+
+    <div id="fb-form">
+      <label>AAPKA NAAM</label>
+      <input id="fb-name" placeholder="Sahil Thorat" style="margin-bottom:12px">
+      <label>PROBLEM / MESSAGE</label>
+      <textarea id="fb-message" rows="4" placeholder="Kya issue aa raha hai? Ya koi suggestion ho toh bhi likho..." style="margin-bottom:14px"></textarea>
+      <button class="btn btn-g" style="margin-bottom:0" onclick="submitFeedback()">📤 Submit</button>
+    </div>
+
+    <div class="fb-success" id="fb-success">
+      <div class="fb-success-icon">✅</div>
+      <div class="fb-success-text">MESSAGE SENT!</div>
+      <div class="fb-success-sub">Feedback mil gayi — jaldi respond karenge 🙏</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     CREATOR DETAIL MODAL
+============================================================ -->
+<div id="creator-detail-modal">
+  <div class="cd-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <div>
+        <div class="cd-name" id="cd-name">—</div>
+        <div class="cd-niche" id="cd-niche">—</div>
+      </div>
+      <button class="fb-modal-close" onclick="closeCreatorDetail()" style="font-size:20px;margin-top:2px">✕</button>
+    </div>
+    <div class="cd-grid" id="cd-grid"></div>
+    <div class="cd-actions" id="cd-actions"></div>
+  </div>
+</div>
+
+
 <div class="hdr">
   <div class="logo">
     <div class="logo-pulse"></div>
@@ -346,10 +640,6 @@ input:checked + .slider::before{transform:translateX(18px);background:var(--g)}
     </div>
   </div>
   <div class="hdr-right">
-    <div class="lang-toggle">
-      <button class="lang-btn active" id="lang-en" onclick="setLang('en')">EN</button>
-      <button class="lang-btn" id="lang-hi" onclick="setLang('hi')">HI</button>
-    </div>
     <div class="ai-badge ai-off" id="ai-badge" onclick="toggleAI()">AI OFF</div>
   </div>
 </div>
@@ -428,10 +718,11 @@ input:checked + .slider::before{transform:translateX(18px);background:var(--g)}
         <div class="stat"><div class="sv" id="s-top">-</div><div class="sl">TOP SCORE</div></div>
       </div>
       <div class="action-bar">
-        <button class="btn-sm btn-out" onclick="exportCSV(lastS,'shortlist')">⬇ Export CSV</button>
-        <button class="btn-sm btn-blue" onclick="exportXLSX(lastS,'shortlist')">⬇ Export XLSX</button>
+        <button class="btn-sm btn-out" onclick="exportCSV(lastS,'shortlist')">⬇ CSV</button>
+        <button class="btn-sm btn-blue" onclick="exportXLSX(lastS,'shortlist')">⬇ XLSX</button>
         <button class="btn-sm btn-g" onclick="exportSelected()">✓ Export Selected</button>
         <button class="btn-sm btn-out" onclick="toggleSelectAll()">☐ Select All</button>
+        <button class="btn-sm btn-pur" onclick="bulkOutreach('shortlist')">📨 Bulk Outreach</button>
         <button class="btn-sm btn-out" onclick="document.getElementById('s-out').style.display='none'">✕ Clear</button>
       </div>
       <div class="sel-info" id="sel-info">0 creators selected</div>
@@ -529,6 +820,17 @@ Deliverable: 1 Reel + 2 Stories"></textarea>
      PAGE: BROWSE
 ============================================================ -->
 <div class="page" id="pg-browse">
+
+  <!-- QUICK CREATOR SEARCH -->
+  <div class="card">
+    <div class="card-hd">🔍 QUICK CREATOR SEARCH</div>
+    <div id="creator-search-bar">
+      <input id="creator-search-input" placeholder="Creator ka naam type karo... (live search)" oninput="liveCreatorSearch(this.value)">
+      <button id="creator-search-clear" onclick="clearCreatorSearch()">✕</button>
+    </div>
+    <div id="search-results-panel"></div>
+  </div>
+
   <div class="card">
     <div class="card-hd">BROWSE DATABASE</div>
     <input id="br-q" placeholder="🔍 Search by name, niche, location..." oninput="brFilter()" style="margin-bottom:10px">
@@ -658,149 +960,224 @@ Deliverable: 1 Reel + 2 Stories"></textarea>
 ============================================================ -->
 <div class="page" id="pg-settings">
 
-  <!-- Shared By + GitHub -->
+  <!-- MY PROFILE — open by default, auto-fills Outreach -->
   <div class="card">
-    <div class="card-hd">🔗 TOOL IDENTITY</div>
-    <label>SHARED BY (aapka naam — feedback messages mein aayega)</label>
-    <input id="shared-by" placeholder="Sahil Thorat" oninput="saveSharedBy()">
-    <label style="margin-top:10px">GITHUB LIVE LINK</label>
-    <div style="display:flex;gap:8px;align-items:center">
-      <input id="gh-link" value="https://thoratsahil27-dotcom.github.io/creator-agent" readonly style="font-size:10px;color:var(--g)">
-      <button class="btn-sm btn-g" onclick="copyGHLink()">Copy</button>
-      <button class="btn-sm btn-out" onclick="window.open('https://thoratsahil27-dotcom.github.io/creator-agent','_blank')">Open</button>
+    <div class="card-hd acc-hd" onclick="toggleAcc('acc-profile')">
+      👤 MY PROFILE
+      <span class="acc-arrow open" id="arr-acc-profile">▼</span>
     </div>
-    <div id="gh-copied" style="color:var(--g);font-size:9px;margin-top:4px;display:none">✅ Link copied!</div>
-  </div>
-
-  <!-- DB Backup -->
-  <div class="card">
-    <div class="card-hd">💾 DATABASE BACKUP</div>
-    <div style="color:var(--muted);font-size:11px;margin-bottom:12px;line-height:1.8">
-      Apna poora database ek file mein export karo. Naye device pe restore karo.
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn-sm btn-g" onclick="exportBackup()">⬇ Export Backup (.json)</button>
-      <button class="btn-sm btn-out" onclick="document.getElementById('backup-file').click()">⬆ Import Backup</button>
-    </div>
-    <input type="file" id="backup-file" accept=".json" style="display:none" onchange="importBackup(this)">
-    <div id="backup-status" style="font-size:10px;margin-top:8px;color:var(--g);display:none"></div>
-  </div>
-
-  <!-- AI Config — Open, any provider -->
-  <div class="card">
-    <div class="card-hd">AI CONFIGURATION</div>
-    <div class="toggle-row">
-      <div>
-        <div class="toggle-label">Enable AI Features</div>
-        <div class="toggle-sub">Use any AI provider for brief parsing and support</div>
+    <div class="acc-body" id="acc-profile">
+      <div class="msg msg-info" style="font-size:10px;margin-bottom:14px;line-height:1.8">
+        💡 Yeh details ek baar save karo — Outreach + Confirmation Mails mein automatically use hongi.
       </div>
-      <label class="toggle">
-        <input type="checkbox" id="ai-toggle" onchange="onAIToggle()">
-        <span class="slider"></span>
-      </label>
-    </div>
-
-    <div id="api-section" style="display:none;margin-top:16px">
-      <label>API PROVIDER</label>
-      <select id="ai-provider" onchange="onProviderChange()" style="margin-bottom:13px">
-        <option value="groq">Groq (Free — llama3-8b-8192)</option>
-        <option value="openai">OpenAI (GPT-4o-mini / GPT-4)</option>
-        <option value="anthropic">Anthropic (Claude)</option>
-        <option value="custom">Custom / Other (OpenAI-compatible)</option>
-      </select>
-
-      <label>API KEY</label>
-      <input id="api-key" type="password" placeholder="Paste your API key here">
-
-      <div id="custom-url-row" style="display:none">
-        <label>CUSTOM API ENDPOINT URL</label>
-        <input id="custom-url" placeholder="https://api.yourprovider.com/v1/chat/completions">
+      <div class="g2">
+        <div><label>YOUR NAME</label><input id="profile-name" placeholder="Rahul Sharma" oninput="saveProfile()"></div>
+        <div><label>COMPANY / AGENCY</label><input id="profile-company" placeholder="XYZ Media Agency" oninput="saveProfile()"></div>
       </div>
-
-      <div id="custom-model-row" style="display:none">
-        <label>MODEL NAME</label>
-        <input id="custom-model" placeholder="e.g. gpt-4o-mini, llama3-70b, mistral-7b">
+      <div class="g2">
+        <div><label>CONTACT / WHATSAPP</label><input id="profile-contact" placeholder="+91 98765 43210" oninput="saveProfile()"></div>
+        <div><label>EMAIL</label><input id="profile-email" placeholder="you@agency.com" oninput="saveProfile()"></div>
       </div>
-
-      <button class="btn btn-g" onclick="saveKey()" style="margin-top:4px">Save Configuration</button>
-
-      <div class="msg msg-info" style="font-size:10px;margin-top:8px">
-        🔒 Keys stored only on this device — never sent anywhere except your chosen AI provider.<br><br>
-        <strong>Free options:</strong><br>
-        • <strong>Groq</strong>: console.groq.com → free llama3 access<br>
-        • <strong>OpenAI</strong>: platform.openai.com → GPT-4o-mini is very cheap<br>
-        • <strong>Anthropic</strong>: console.anthropic.com → Claude API<br>
-        • <strong>Custom</strong>: Any OpenAI-compatible endpoint (Ollama, Together AI, etc.)
+      <div style="color:var(--g);font-size:9px;letter-spacing:1.5px;font-weight:700;margin:14px 0 6px">PAYMENT DEFAULTS</div>
+      <div class="g2">
+        <div>
+          <label>PAYMENT CYCLE</label>
+          <select id="profile-payment-days" onchange="saveProfile()">
+            <option value="30">30 days from invoice</option>
+            <option value="45">45 days from invoice</option>
+            <option value="60">60 days from invoice</option>
+            <option value="90">90 days from invoice</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div>
+          <label>TDS DEDUCTION</label>
+          <select id="profile-tds" onchange="saveProfile()">
+            <option value="yes">Yes — TDS will be deducted</option>
+            <option value="no">No TDS</option>
+          </select>
+        </div>
       </div>
+      <div class="g2">
+        <div><label>CUSTOM PAYMENT TERMS</label><input id="profile-payment-custom" placeholder="45 days from video/invoice share date" oninput="saveProfile()"></div>
+        <div><label>CC EMAIL (billing/accounts)</label><input id="profile-cc" placeholder="accounts@agency.com" oninput="saveProfile()"></div>
+      </div>
+      <label>MAIL SIGNATURE</label>
+      <textarea id="profile-signature" rows="3" placeholder="Thank you!&#10;Rahul Sharma | XYZ Media&#10;rahul@xyz.com | +91 98765 43210" oninput="saveProfile()"></textarea>
+      <div id="profile-saved" style="color:var(--g);font-size:10px;display:none;margin-top:6px">✅ Profile saved!</div>
     </div>
   </div>
 
-  <!-- Support Assistant -->
+  <!-- GitHub / Tool Link — accordion -->
   <div class="card">
-    <div class="card-hd">SUPPORT ASSISTANT</div>
-    <label>DESCRIBE YOUR ISSUE</label>
-    <textarea id="support-txt" rows="5" placeholder="Describe your issue here. e.g., 'Excel file is not loading', 'Shortlist showing no results'..."></textarea>
-    <button class="btn btn-g" onclick="runSupport()">🔧 Get Help</button>
-    <div id="support-out" style="display:none">
-      <div class="card-hd" style="margin-top:14px">SUGGESTED SOLUTION</div>
-      <div id="support-result" style="font-size:12px;line-height:1.8;color:var(--text)"></div>
+    <div class="card-hd acc-hd" onclick="toggleAcc('acc-identity')">
+      🔗 TOOL LINK
+      <span class="acc-arrow" id="arr-acc-identity">▼</span>
+    </div>
+    <div class="acc-body collapsed" id="acc-identity">
+      <label>GITHUB LIVE LINK</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="gh-link" value="https://thoratsahil27-dotcom.github.io/creator-agent" readonly style="font-size:10px;color:var(--g)">
+        <button class="btn-sm btn-g" onclick="copyGHLink()">Copy</button>
+        <button class="btn-sm btn-out" onclick="window.open('https://thoratsahil27-dotcom.github.io/creator-agent','_blank')">Open</button>
+      </div>
+      <div id="gh-copied" style="color:var(--g);font-size:9px;margin-top:4px;display:none">✅ Link copied!</div>
+      <label style="margin-top:12px">SHARED BY (feedback messages mein aayega)</label>
+      <input id="shared-by" placeholder="Aapka naam" oninput="saveSharedBy()">
     </div>
   </div>
 
-  <!-- Error Log -->
+  <!-- DB Backup — accordion -->
   <div class="card">
-    <div class="card-hd">ERROR LOG (<span id="err-count">0</span> entries)</div>
-    <div id="heal-log"><div class="empty">No errors — everything is running smoothly ✅</div></div>
-    <div class="action-bar" style="margin-top:12px">
-      <button class="btn-sm btn-out" onclick="clearErrors()">Clear Log</button>
+    <div class="card-hd acc-hd" onclick="toggleAcc('acc-backup')">
+      💾 DATABASE BACKUP
+      <span class="acc-arrow" id="arr-acc-backup">▼</span>
+    </div>
+    <div class="acc-body collapsed" id="acc-backup">
+      <div style="color:var(--muted);font-size:11px;margin-bottom:12px;line-height:1.8">
+        Apna poora database ek file mein export karo. Naye device pe restore karo.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-sm btn-g" onclick="exportBackup()">⬇ Export Backup (.json)</button>
+        <button class="btn-sm btn-out" onclick="document.getElementById('backup-file').click()">⬆ Import Backup</button>
+      </div>
+      <input type="file" id="backup-file" accept=".json" style="display:none" onchange="importBackup(this)">
+      <div id="backup-status" style="font-size:10px;margin-top:8px;color:var(--g);display:none"></div>
     </div>
   </div>
 
-  <!-- App Info -->
+  <!-- AI Config — accordion -->
+  <div class="card">
+    <div class="card-hd acc-hd" onclick="toggleAcc('acc-ai')">
+      🤖 AI CONFIGURATION
+      <span class="acc-arrow" id="arr-acc-ai">▼</span>
+    </div>
+    <div class="acc-body collapsed" id="acc-ai">
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Enable AI Features</div>
+          <div class="toggle-sub">Use any AI provider for brief parsing and support</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="ai-toggle" onchange="onAIToggle()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="api-section" style="display:none;margin-top:16px">
+        <label>API PROVIDER</label>
+        <select id="ai-provider" onchange="onProviderChange()" style="margin-bottom:13px">
+          <option value="groq">Groq (Free — llama3-8b-8192)</option>
+          <option value="openai">OpenAI (GPT-4o-mini / GPT-4)</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="custom">Custom / Other (OpenAI-compatible)</option>
+        </select>
+        <label>API KEY</label>
+        <input id="api-key" type="password" placeholder="Paste your API key here">
+        <div id="custom-url-row" style="display:none">
+          <label>CUSTOM API ENDPOINT URL</label>
+          <input id="custom-url" placeholder="https://api.yourprovider.com/v1/chat/completions">
+        </div>
+        <div id="custom-model-row" style="display:none">
+          <label>MODEL NAME</label>
+          <input id="custom-model" placeholder="e.g. gpt-4o-mini, llama3-70b, mistral-7b">
+        </div>
+        <button class="btn btn-g" onclick="saveKey()" style="margin-top:4px">Save Configuration</button>
+        <div class="msg msg-info" style="font-size:10px;margin-top:8px">
+          🔒 Keys stored only on this device — never sent anywhere except your chosen AI provider.<br><br>
+          <strong>Free options:</strong><br>
+          • <strong>Groq</strong>: console.groq.com → free llama3 access<br>
+          • <strong>OpenAI</strong>: platform.openai.com → GPT-4o-mini is very cheap<br>
+          • <strong>Anthropic</strong>: console.anthropic.com → Claude API<br>
+          • <strong>Custom</strong>: Any OpenAI-compatible endpoint (Ollama, Together AI, etc.)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Support Assistant — accordion -->
+  <div class="card">
+    <div class="card-hd acc-hd" onclick="toggleAcc('acc-support')">
+      🔧 SUPPORT ASSISTANT
+      <span class="acc-arrow" id="arr-acc-support">▼</span>
+    </div>
+    <div class="acc-body collapsed" id="acc-support">
+      <label>DESCRIBE YOUR ISSUE</label>
+      <textarea id="support-txt" rows="5" placeholder="Describe your issue here. e.g., 'Excel file is not loading', 'Shortlist showing no results'..."></textarea>
+      <button class="btn btn-g" onclick="runSupport()">🔧 Get Help</button>
+      <div id="support-out" style="display:none">
+        <div class="card-hd" style="margin-top:14px">SUGGESTED SOLUTION</div>
+        <div id="support-result" style="font-size:12px;line-height:1.8;color:var(--text)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Log — accordion -->
+  <div class="card">
+    <div class="card-hd acc-hd" onclick="toggleAcc('acc-errlog')">
+      ⚠️ ERROR LOG (<span id="err-count">0</span> entries)
+      <span class="acc-arrow" id="arr-acc-errlog">▼</span>
+    </div>
+    <div class="acc-body collapsed" id="acc-errlog">
+      <div id="heal-log"><div class="empty">No errors — everything is running smoothly ✅</div></div>
+      <div class="action-bar" style="margin-top:12px">
+        <button class="btn-sm btn-out" onclick="clearErrors()">Clear Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Info + Guide Download — accordion -->
   <div class="card" id="doc-download-section">
-    <div class="card-hd">📖 USER GUIDE</div>
-    <div style="color:var(--muted);font-size:11px;line-height:1.8;margin-bottom:12px">
-      Complete reference guide — sheet format, brief writing, POC tracking, best practices.
+    <div class="card-hd acc-hd" onclick="toggleAcc('acc-appinfo')">
+      📖 USER GUIDE & APP INFO
+      <span class="acc-arrow" id="arr-acc-appinfo">▼</span>
     </div>
-    <button class="btn btn-blue" onclick="downloadDocx()" style="margin-bottom:8px">⬇ Download User Guide (DOCX)</button>
-    <script>
+    <div class="acc-body collapsed" id="acc-appinfo">
+      <div style="color:var(--muted);font-size:11px;line-height:1.8;margin-bottom:12px">
+        Complete reference guide — sheet format, brief writing, POC tracking, best practices.
+      </div>
+      <button class="btn btn-blue" onclick="downloadDocx()" style="margin-bottom:8px">⬇ Download User Guide (DOCX)</button>
+      <div style="color:var(--muted);font-size:9px;margin-bottom:14px">Guide tab ke andar bhi sab content available hai →</div>
+      <div style="color:var(--muted);font-size:11px;line-height:2.2">
+        <div>Version: <strong style="color:var(--g)">10.0</strong> | Offline-First</div>
+        <div>Storage: IndexedDB (local device only)</div>
+        <div>New: Welcome screen · Creator search · Bulk outreach · Feedback modal · Accordion UI · Phone auto-fix</div>
+        <div>AI: Only brief text sent — creator data NEVER transmitted</div>
+        <div>Formats: XLSX, XLS, CSV, ZIP import &amp; XLSX/CSV export</div>
+      </div>
+      <div class="msg msg-info" style="margin-top:12px;font-size:10px;line-height:2">
+        📱 <strong>Background / Screen Off:</strong><br>
+        Ye ek HTML file hai — browser tab band hone pe processing ruk jaati hai.<br><br>
+        <strong>Best practice:</strong><br>
+        • Upload karo → screen ON rakho jab tak "Import complete" na aaye<br>
+        • Bade imports ke liye phone charger pe rakho
+      </div>
+    </div>
+  </div>
+
+  <!-- About / Welcome Screen Revisit -->
+  <div class="card">
+    <div class="card-hd acc-hd" onclick="toggleAcc('acc-about')">
+      ℹ️ ABOUT THIS TOOL
+      <span class="acc-arrow" id="arr-acc-about">▼</span>
+    </div>
+    <div class="acc-body collapsed" id="acc-about">
+      <div style="color:var(--muted);font-size:11px;line-height:2;margin-bottom:14px">
+        <div><strong style="color:var(--text)">Tool:</strong> Creator Agent v10.0</div>
+        <div><strong style="color:var(--text)">User:</strong> <span id="about-user">Not set — fill My Profile above</span></div>
+        <div><strong style="color:var(--text)">Company:</strong> <span id="about-company">Not set</span></div>
+        <div><strong style="color:var(--text)">Purpose:</strong> Influencer shortlisting, outreach, database management</div>
+        <div><strong style="color:var(--text)">Data:</strong> 100% offline — nothing leaves your device</div>
+      </div>
+      <button class="btn-sm btn-out" onclick="showWelcomeAgain()">👁 View Welcome Screen Again</button>
+    </div>
+  </div>
+</div>
     window._docxB64 = "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";
     function downloadDocx() {
       const bin = atob(window._docxB64);
       const arr = new Uint8Array(bin.length);
       for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
       const blob = new Blob([arr], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href=url; a.download='CreatorAgent_UserGuide.docx';
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a);
-      setTimeout(()=>URL.revokeObjectURL(url),1000);
-    }
-    </script>
-    <div style="color:var(--muted);font-size:9px">Guide tab ke andar bhi sab content available hai →</div>
-  </div>
-
-  <div class="card">
-    <div class="card-hd">APPLICATION INFO</div>
-    <div style="color:var(--muted);font-size:11px;line-height:2.2">
-      <div>Version: 9.0 | Offline-First</div>
-      <div>Storage: IndexedDB (local device only)</div>
-      <div>New: ZIP upload · POC tracking · Cost Date · Guide tab · WhatsApp→AI prompt</div>
-      <div>AI: Only brief text sent — creator data NEVER transmitted</div>
-      <div>Formats: XLSX, XLS, CSV, ZIP import &amp; XLSX/CSV export</div>
-    </div>
-    <div class="msg msg-info" style="margin-top:12px;font-size:10px;line-height:2">
-      📱 <strong>Background / Screen Off:</strong><br>
-      Ye ek HTML file hai — browser tab band hone pe processing ruk jaati hai. Yeh browser ka limitation hai, koi bhi HTML app aise kaam nahi karta.<br><br>
-      <strong>Best practice:</strong><br>
-      • Upload karo → screen ON rakho jab tak "Import complete" na aaye<br>
-      • Bade imports ke liye phone charger pe rakho<br>
-      • Data save ho jaata hai — agar tab minimize bhi karo toh data safe hai, bas processing ruk jaati hai
-    </div>
-  </div>
-</div>
-
 <!-- ============================================================
      BOTTOM NAV
 ============================================================ -->
@@ -828,69 +1205,139 @@ Deliverable: 1 Reel + 2 Stories"></textarea>
   </button>
 </div>
 
+<!-- Tool credit footer -->
+<div class="tool-footer">Made by Sahil Thorat &nbsp;·&nbsp; Creator Agent v11</div>
+
 <!-- ============================================================
      PAGE: OUTREACH
 ============================================================ -->
 <div class="page" id="pg-outreach">
 
-  <!-- Sender Info -->
-  <div class="card">
-    <div class="card-hd" id="or-lbl-sender">👤 AAPKI INFO (ek baar save karo)</div>
-    <div class="g2">
-      <div><label id="or-lbl-name">AAPKA NAAM</label><input id="or-name" placeholder="Sahil Thorat" oninput="saveOutreachSender()"></div>
-      <div><label id="or-lbl-agency">AGENCY</label><input id="or-agency" placeholder="Illuminati Media" oninput="saveOutreachSender()"></div>
-    </div>
-    <label id="or-lbl-phone">WHATSAPP NUMBER (+91...)</label>
-    <input id="or-phone" placeholder="+918082812805" oninput="saveOutreachSender()">
-    <div class="msg msg-info" style="margin-top:8px;font-size:10px">💡 <span id="or-lbl-tip">Yeh info save hoti hai — dobara nahi daalni</span></div>
-  </div>
-
   <!-- Campaign Details -->
   <div class="card">
-    <div class="card-hd" id="or-lbl-campaign">📋 CAMPAIGN DETAILS</div>
-    <label id="or-lbl-brand">BRAND NAME</label>
-    <input id="or-brand" placeholder="Raymond">
-    <label id="or-lbl-obj">OBJECTIVE (1-2 lines)</label>
-    <textarea id="or-obj" rows="3" placeholder="Raymond ke trouser styles aur fabrics ko lifestyle storytelling se highlight karna."></textarea>
-    <label id="or-lbl-deliv">DELIVERABLES (ek per line)</label>
-    <textarea id="or-deliv" rows="4" placeholder="1 Store Visit Collab Reel&#10;3 Months Digital Usage Rights&#10;2-3 Static/Carousel Images"></textarea>
+    <div class="card-hd">📋 CAMPAIGN DETAILS</div>
     <div class="g2">
-      <div><label id="or-lbl-date">LIVE DATE</label><input id="or-date" placeholder="9th February 2026"></div>
-      <div><label id="or-lbl-note">SPECIAL NOTE</label><input id="or-note" placeholder="Outfits store se lene honge"></div>
+      <div><label>BRAND NAME</label><input id="or-brand" placeholder="Raymond"></div>
+      <div><label>CAMPAIGN NAME</label><input id="or-campaign-name" placeholder="Raymond Goa Store Activity"></div>
     </div>
+    <label>OBJECTIVE (1-2 lines)</label>
+    <textarea id="or-obj" rows="2" placeholder="Highlight the Raymond store, fabrics and styling through a store visit reel."></textarea>
+    <div class="g2">
+      <div><label>CITY / LOCATION</label><input id="or-city" placeholder="Goa"></div>
+      <div><label>MEDIA / PLATFORM</label>
+        <select id="or-platform">
+          <option value="Instagram">Instagram</option>
+          <option value="YouTube">YouTube</option>
+          <option value="Instagram + YouTube">Instagram + YouTube</option>
+          <option value="TikTok">TikTok</option>
+          <option value="LinkedIn">LinkedIn</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2">
+      <div><label>SHOOT DATE</label><input id="or-shoot-date" placeholder="This week (TBD)"></div>
+      <div><label>LIVE DATE</label><input id="or-date" placeholder="June 2026"></div>
+    </div>
+    <div class="g2">
+      <div><label>VIDEO SUBMISSION (days after shoot)</label><input id="or-submit-days" placeholder="Within 2 days of shoot"></div>
+      <div><label>SPECIAL NOTE</label><input id="or-note" placeholder="Outfits to be picked from store"></div>
+    </div>
+  </div>
+
+  <!-- Deliverables Picker -->
+  <div class="card">
+    <div class="card-hd">📦 DELIVERABLES</div>
+    <div style="color:var(--muted);font-size:10px;margin-bottom:10px">Click to select deliverables — ya manually bhi type kar sakte ho neeche.</div>
+    <div id="deliv-picker-wrap">
+      <div class="deliv-cat">VIDEO</div>
+      <div class="deliv-picker" id="dp-video"></div>
+      <div class="deliv-cat">IMAGE / STATIC</div>
+      <div class="deliv-picker" id="dp-image"></div>
+      <div class="deliv-cat">STORY</div>
+      <div class="deliv-picker" id="dp-story"></div>
+      <div class="deliv-cat">USAGE RIGHTS</div>
+      <div class="deliv-picker" id="dp-usage"></div>
+      <div class="deliv-cat">OTHER</div>
+      <div class="deliv-picker" id="dp-other"></div>
+    </div>
+    <label style="margin-top:12px">SELECTED / CUSTOM DELIVERABLES</label>
+    <textarea id="or-deliv" rows="4" placeholder="1 Store Visit Collab Reel&#10;1 Instagram Story&#10;3 Months Digital Usage Rights"></textarea>
+    <button class="btn-sm btn-out" style="margin-top:6px" onclick="clearDelivPicker()">✕ Clear Selection</button>
   </div>
 
   <!-- Creator List -->
   <div class="card">
-    <div class="card-hd" id="or-lbl-creators">👥 CREATORS</div>
-    <div class="msg msg-info" style="margin-bottom:12px;font-size:10px" id="or-db-tip">
-      💡 Shortlist / Brief tab se "Load Selected" karo ya manually add karo
+    <div class="card-hd">👥 CREATORS</div>
+    <div class="msg msg-info" style="margin-bottom:12px;font-size:10px">
+      💡 Shortlist tab se "Bulk Outreach" karo ya manually add karo
     </div>
-    <button class="btn-sm btn-out" style="margin-bottom:10px" onclick="loadSelectedCreators()">⬇ Load Selected Creators from Shortlist</button>
+    <button class="btn-sm btn-out" style="margin-bottom:10px" onclick="loadSelectedCreators()">⬇ Load from Shortlist</button>
     <div id="or-creator-list"></div>
-    <button class="btn btn-out" style="margin-top:4px" onclick="addOutreachCreator()">+ <span id="or-lbl-add">Creator Add Karo</span></button>
+    <button class="btn btn-out" style="margin-top:4px" onclick="addOutreachCreator()">+ Add Creator</button>
   </div>
 
-  <!-- Format + Generate -->
+  <!-- Outreach Message -->
   <div class="card">
-    <div class="card-hd" id="or-lbl-format">💬 MESSAGE FORMAT</div>
+    <div class="card-hd">💬 OUTREACH MESSAGE</div>
     <div class="or-fmt-toggle">
       <button class="or-fmt-btn active" id="or-fmt-wa" onclick="setOrFormat('wa')">📱 WhatsApp</button>
       <button class="or-fmt-btn" id="or-fmt-em" onclick="setOrFormat('em')">✉️ Email</button>
     </div>
-    <button class="btn btn-g" onclick="generateOutreach()">⚡ <span id="or-lbl-gen">Messages Generate Karo</span></button>
+    <button class="btn btn-g" onclick="generateOutreach()">⚡ Generate Outreach Messages</button>
   </div>
 
-  <!-- Output -->
+  <!-- Outreach Output -->
   <div class="card" id="or-output" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-      <div class="card-hd" style="margin:0" id="or-lbl-results">📨 GENERATED MESSAGES</div>
+      <div class="card-hd" style="margin:0">📨 GENERATED MESSAGES</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn-sm btn-out" onclick="exportOutreachTXT()">⬇ TXT</button>
         <button class="btn-sm btn-blue" onclick="exportOutreachCSV()">⬇ CSV</button>
       </div>
     </div>
     <div id="or-messages"></div>
+  </div>
+
+  <!-- Confirmation Mail -->
+  <div class="card">
+    <div class="card-hd">📧 CONFIRMATION MAIL GENERATOR</div>
+    <div class="msg msg-info" style="font-size:10px;margin-bottom:14px;line-height:1.8">
+      💡 Campaign details upar fill karo → creator select karo → AI se professional confirmation mail generate karo.
+    </div>
+    <div class="g2">
+      <div>
+        <label>CREATOR NAME (for this mail)</label>
+        <input id="conf-creator-name" placeholder="Prathamesh" list="conf-creator-list">
+        <datalist id="conf-creator-list"></datalist>
+      </div>
+      <div>
+        <label>COMMERCIAL (₹)</label>
+        <input id="conf-commercial" placeholder="1,20,000">
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <label>PAYMENT TERMS (override)</label>
+        <input id="conf-payment" placeholder="45 days from invoice">
+      </div>
+      <div>
+        <label>CC EMAIL</label>
+        <input id="conf-cc" placeholder="accounts@agency.com">
+      </div>
+    </div>
+    <label>EXTRA NOTES / T&C ADDITIONS</label>
+    <textarea id="conf-extra" rows="2" placeholder="Any extra mandate or T&C to include..."></textarea>
+    <button class="btn btn-g" style="margin-bottom:8px" onclick="generateConfirmationMail()">✉️ Generate Confirmation Mail (AI)</button>
+    <button class="btn btn-out" style="margin-bottom:0" onclick="generateConfirmationMailOffline()">⚡ Quick Generate (Offline)</button>
+
+    <div id="conf-mail-output" style="display:none;margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:9px;color:var(--g);letter-spacing:2px;font-weight:700">CONFIRMATION MAIL</div>
+        <button class="btn-sm btn-g" onclick="copyConfMail()">📋 Copy</button>
+      </div>
+      <div class="conf-mail-box" id="conf-mail-text"></div>
+      <div id="conf-copy-msg" style="color:var(--g);font-size:10px;margin-top:6px;display:none">✅ Copied!</div>
+    </div>
   </div>
 </div>
 
@@ -901,11 +1348,12 @@ Deliverable: 1 Reel + 2 Stories"></textarea>
 
   <!-- Slide nav -->
   <div class="card" style="padding:0;overflow:hidden">
-    <div style="display:flex;background:var(--card2);border-bottom:1px solid var(--border)">
+    <div style="display:flex;background:var(--card2);border-bottom:1px solid var(--border);flex-wrap:wrap">
       <button class="guide-tab active" id="gtab-0" onclick="switchGuide(0)">📋 Sheet Format</button>
       <button class="guide-tab" id="gtab-1" onclick="switchGuide(1)">✍️ Brief Format</button>
       <button class="guide-tab" id="gtab-2" onclick="switchGuide(2)">📱 WhatsApp→AI</button>
       <button class="guide-tab" id="gtab-3" onclick="switchGuide(3)">💡 Best Practices</button>
+      <button class="guide-tab" id="gtab-4" onclick="switchGuide(4)">📨 Outreach Steps</button>
     </div>
   </div>
 
@@ -934,7 +1382,7 @@ Deliverable: 1 Reel + 2 Stories"></textarea>
             <tr><td>7</td><td style="color:var(--g);font-weight:700">Gender</td><td style="color:var(--muted);font-size:10px">Sex</td><td style="font-size:10px">Female / Male</td><td style="color:var(--muted)">—</td></tr>
             <tr><td>8</td><td style="color:var(--g);font-weight:700">Location</td><td style="color:var(--muted);font-size:10px">City, State, Based In, Place</td><td style="font-size:10px">Mumbai</td><td style="color:var(--muted)">—</td></tr>
             <tr><td>9</td><td style="color:var(--g);font-weight:700">Contact</td><td style="color:var(--muted);font-size:10px">Phone, Mobile, WhatsApp, Phone No</td><td style="font-size:10px">+91-9876543210</td><td style="color:var(--muted)">—</td></tr>
-            <tr><td>10</td><td style="color:var(--g);font-weight:700">Email</td><td style="color:var(--muted);font-size:10px">E-mail, Mail, Gmail</td><td style="font-size:10px">priya@gmail.com</td><td style="color:var(--muted)">—</td></tr>
+            <tr><td>10</td><td style="color:var(--g);font-weight:700">Email</td><td style="color:var(--muted);font-size:10px">E-mail, Mail, Gmail</td><td style="font-size:10px"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a7d7d5cedec6e7c0cac6cecb89c4c8ca">[email&#160;protected]</a></td><td style="color:var(--muted)">—</td></tr>
             <tr><td>11</td><td style="color:var(--g);font-weight:700">Cost Per Reel</td><td style="color:var(--muted);font-size:10px">Cost, Rate, Price, Our Cost 1 Reel, Charges</td><td style="font-size:10px">18000</td><td style="color:var(--muted)">—</td></tr>
             <tr><td>12</td><td style="color:var(--g);font-weight:700">Cost Date</td><td style="color:var(--muted);font-size:10px">Rate Date, Price Date, Cost As Of</td><td style="font-size:10px">Jan 2025</td><td style="color:var(--muted)">—</td></tr>
             <tr><td>13</td><td style="color:var(--g);font-weight:700">POC Name</td><td style="color:var(--muted);font-size:10px">Contact Person, POC, Manager Name</td><td style="font-size:10px">Rahul Sharma</td><td style="color:var(--muted)">—</td></tr>
@@ -1098,16 +1546,69 @@ Deliverable: 1 Reel + 2 Stories"></textarea>
         <div class="guide-tip">🔒 <strong>Data privacy:</strong> Sab kuch aapke device pe — koi data server pe nahi jaata</div>
       </div>
     </div>
+  <!-- SLIDE 4: Outreach Steps -->
+  <div class="guide-slide" id="gslide-4" style="display:none">
+    <div class="card">
+      <div class="card-hd">📨 OUTREACH — STEP BY STEP GUIDE</div>
+      <div style="color:var(--muted);font-size:11px;margin-bottom:18px;line-height:1.8">
+        Creator ko reach out karne ke liye yeh steps follow karo. Sab kuch tool ke andar hi hoga.
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <!-- Step 1 -->
+        <div style="display:flex;gap:14px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="background:var(--g);color:#000;font-weight:700;font-size:11px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+          <div>
+            <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:4px">CREATOR SEARCH KARO</div>
+            <div style="color:var(--text);font-size:11px;line-height:1.8">Browse tab mein jaao → Quick Creator Search mein creator ka naam type karo → Live results aayenge neeche.</div>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div style="display:flex;gap:14px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="background:var(--g);color:#000;font-weight:700;font-size:11px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+          <div>
+            <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:4px">DETAILS DEKHO</div>
+            <div style="color:var(--text);font-size:11px;line-height:1.8">Search result pe tap karo → Creator ka full profile modal khulega: Name, Niche, Followers, Contact, Email, IG Link, Cost sab ek jagah.</div>
+          </div>
+        </div>
+        <!-- Step 3 -->
+        <div style="display:flex;gap:14px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="background:var(--g);color:#000;font-weight:700;font-size:11px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+          <div>
+            <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:4px">CONTACT CHECK KARO</div>
+            <div style="color:var(--text);font-size:11px;line-height:1.8">Profile modal mein Contact Number ya Email check karo. "Outreach bhejo" button click karo — directly Outreach tab mein woh creator load ho jaayega.</div>
+          </div>
+        </div>
+        <!-- Step 4 -->
+        <div style="display:flex;gap:14px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="background:var(--g);color:#000;font-weight:700;font-size:11px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</div>
+          <div>
+            <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:4px">MESSAGE CUSTOMIZE KARO</div>
+            <div style="color:var(--text);font-size:11px;line-height:1.8">Outreach tab mein Brand Name, Objective, Deliverables daalo → "Generate Messages" click karo → WhatsApp ya Email format mein ready message milega.</div>
+          </div>
+        </div>
+        <!-- Step 5 -->
+        <div style="display:flex;gap:14px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="background:var(--g);color:#000;font-weight:700;font-size:11px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</div>
+          <div>
+            <div style="color:var(--g);font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:4px">SEND KARO</div>
+            <div style="color:var(--text);font-size:11px;line-height:1.8">"📱 WhatsApp Direct" → agar number hai toh directly wahi WhatsApp open hoga. Ya "📋 Copy" karo aur manually bhejo. Bulk mein karna ho toh Shortlist tab mein creators select karo → "📨 Bulk Outreach" button.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg msg-info" style="margin-top:16px;font-size:10px;line-height:1.8">
+        💡 <strong>Bulk Outreach Shortcut:</strong> Shortlist tab se multiple creators select karo (checkbox) → "📨 Bulk Outreach" → campaign details daalo → sab ke liye messages ek saath generate honge.
+      </div>
+    </div>
   </div>
 </div>
-
-<!-- Guide CSS inline -->
 <style>
 .guide-tab{flex:1;padding:10px 4px;border:none;background:transparent;color:var(--muted);font-family:var(--font);font-size:9px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.5px}
 .guide-tab.active{color:var(--g);border-bottom-color:var(--g);background:#0a1220}
 .guide-tip{padding:8px 12px;margin-bottom:6px;background:var(--card2);border-left:3px solid var(--g);border-radius:0 6px 6px 0;font-size:11px;color:var(--text);line-height:1.7}
 </style>
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ============================================================
 // STATE & CONSTANTS
 // ============================================================
@@ -1237,10 +1738,29 @@ async function init() {
     // Restore outreach sender
     loadOutreachSender();
 
+    // Load user profile & sync to outreach
+    const profile = loadProfile();
+    syncProfileToOutreach(profile);
+
+    // Init deliverables picker
+    initDelivPicker();
+
+    // Prefill conf mail payment/cc from profile
+    const confPayEl = document.getElementById('conf-payment');
+    if (confPayEl && !confPayEl.value && profile.payment_days) {
+      confPayEl.value = profile.payment_custom || (profile.payment_days + ' days from video/invoice share date');
+    }
+    const confCCEl = document.getElementById('conf-cc');
+    if (confCCEl && !confCCEl.value && profile.cc) confCCEl.value = profile.cc;
+
     // Add first outreach creator row
     if (document.getElementById('or-creator-list') && !document.querySelector('.or-creator-row')) {
       addOutreachCreator();
     }
+
+    // Welcome screen + Setup
+    initWelcome();
+    setTimeout(initSetup, 100); // slight delay so welcome renders first
 
     log('App initialized — ' + allC.length + ' creators loaded');
   } catch (e) {
@@ -2851,17 +3371,7 @@ function switchTab(name) {
   window.scrollTo(0, 0);
 }
 
-// ============================================================
-// GUIDE — slide switcher
-// ============================================================
-function switchGuide(idx) {
-  for (let i = 0; i < 4; i++) {
-    const slide = document.getElementById('gslide-' + i);
-    const tab = document.getElementById('gtab-' + i);
-    if (slide) slide.style.display = i === idx ? 'block' : 'none';
-    if (tab) tab.classList.toggle('active', i === idx);
-  }
-}
+// GUIDE — switchGuide now handled above (5 slides)
 
 // ============================================================
 // WHATSAPP → AI PROMPT GENERATOR
@@ -2919,72 +3429,12 @@ function copyPrompt() {
 
 
 // ============================================================
-// LANGUAGE TOGGLE — Hinglish / English
+// LANGUAGE — English only
 // ============================================================
 const LANG_KEY = 'ca_lang_v9';
 let currentLang = 'en';
-
-const LABELS = {
-  en: {
-    shortlist: 'SHORTLIST', brief: 'BRIEF', browse: 'BROWSE',
-    db: 'DATABASE', outreach: 'OUTREACH', guide: 'GUIDE', settings: 'SETTINGS',
-    'or-lbl-sender': 'YOUR INFO (save once)',
-    'or-lbl-name': 'YOUR NAME', 'or-lbl-agency': 'AGENCY',
-    'or-lbl-phone': 'WHATSAPP NUMBER',
-    'or-lbl-tip': 'This info is saved — no need to re-enter',
-    'or-lbl-campaign': 'CAMPAIGN DETAILS',
-    'or-lbl-brand': 'BRAND NAME', 'or-lbl-obj': 'OBJECTIVE',
-    'or-lbl-deliv': 'DELIVERABLES (one per line)',
-    'or-lbl-date': 'LIVE DATE', 'or-lbl-note': 'SPECIAL NOTE',
-    'or-lbl-creators': 'CREATORS',
-    'or-db-tip': '💡 Load from Shortlist/Brief or add manually',
-    'or-lbl-add': 'Add Creator',
-    'or-lbl-format': 'MESSAGE FORMAT',
-    'or-lbl-gen': 'Generate Messages',
-    'or-lbl-results': 'GENERATED MESSAGES',
-  },
-  hi: {
-    shortlist: 'शॉर्टलिस्ट', brief: 'ब्रीफ', browse: 'ब्राउज़',
-    db: 'डेटाबेस', outreach: 'आउटरीच', guide: 'गाइड', settings: 'सेटिंग',
-    'or-lbl-sender': '👤 AAPKI INFO (ek baar save karo)',
-    'or-lbl-name': 'AAPKA NAAM', 'or-lbl-agency': 'AGENCY',
-    'or-lbl-phone': 'WHATSAPP NUMBER',
-    'or-lbl-tip': 'Yeh info save hoti hai — dobara nahi daalni',
-    'or-lbl-campaign': '📋 CAMPAIGN DETAILS',
-    'or-lbl-brand': 'BRAND KA NAAM', 'or-lbl-obj': 'OBJECTIVE',
-    'or-lbl-deliv': 'DELIVERABLES (ek per line)',
-    'or-lbl-date': 'LIVE DATE', 'or-lbl-note': 'SPECIAL NOTE',
-    'or-lbl-creators': '👥 CREATORS',
-    'or-db-tip': '💡 Shortlist se load karo ya manually daalo',
-    'or-lbl-add': 'Creator Add Karo',
-    'or-lbl-format': '💬 MESSAGE FORMAT',
-    'or-lbl-gen': 'Messages Banao',
-    'or-lbl-results': '📨 MESSAGES READY',
-  }
-};
-
-function setLang(lang) {
-  currentLang = lang;
-  localStorage.setItem(LANG_KEY, lang);
-  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
-  document.getElementById('lang-hi').classList.toggle('active', lang === 'hi');
-  applyLang();
-}
-
-function applyLang() {
-  const L = LABELS[currentLang] || LABELS.en;
-  // Nav labels
-  const navMap = { shortlist:'SHORTLIST', brief:'BRIEF', browse:'BROWSE', db:'DATABASE', outreach:'OUTREACH', guide:'GUIDE', settings:'SETTINGS' };
-  Object.keys(navMap).forEach(k => {
-    const el = document.getElementById('nav-lbl-' + k);
-    if (el) el.textContent = (L[k] || navMap[k]).toUpperCase();
-  });
-  // Outreach labels
-  Object.keys(L).forEach(id => {
-    const el = document.getElementById(id);
-    if (el && el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') el.textContent = L[id];
-  });
-}
+function setLang(lang) { currentLang = 'en'; }
+function applyLang() {}  // No-op — English only
 
 // ============================================================
 // SHARED BY + GITHUB LINK
@@ -3005,30 +3455,267 @@ function copyGHLink() {
 }
 
 // ============================================================
-// FEEDBACK → WHATSAPP
+// WELCOME SCREEN
+// ============================================================
+const WELCOME_KEY = 'ca_welcomed_v10';
+
+function initWelcome() {
+  const seen = localStorage.getItem(WELCOME_KEY);
+  const ws = document.getElementById('welcome-screen');
+  if (!ws) return;
+  if (seen) {
+    ws.style.display = 'none';
+  } else {
+    ws.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function showWelcomeAgain() {
+  const ws = document.getElementById('welcome-screen');
+  ws.classList.remove('hiding');
+  ws.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+// ============================================================
+// ACCORDION — Collapse / Expand
+// ============================================================
+function toggleAcc(id) {
+  const body = document.getElementById(id);
+  const arrow = document.getElementById('arr-' + id);
+  if (!body) return;
+  const isOpen = !body.classList.contains('collapsed');
+  body.classList.toggle('collapsed', isOpen);
+  if (arrow) arrow.classList.toggle('open', !isOpen);
+}
+
+// ============================================================
+// FEEDBACK MODAL (replaces direct WA open)
 // ============================================================
 function sendFeedback() {
-  const sharedBy = localStorage.getItem(SHARED_BY_KEY) || 'Unknown User';
+  const modal = document.getElementById('feedback-modal');
+  const form = document.getElementById('fb-form');
+  const success = document.getElementById('fb-success');
+  // pre-fill name from profile or shared-by
+  let savedName = '';
+  try { savedName = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}').name || ''; } catch(e) {}
+  if (!savedName) savedName = localStorage.getItem(SHARED_BY_KEY) || '';
+  const nameEl = document.getElementById('fb-name');
+  if (nameEl && savedName) nameEl.value = savedName;
+  if (form) form.style.display = 'block';
+  if (success) success.style.display = 'none';
+  document.getElementById('fb-message').value = '';
+  modal.classList.add('open');
+}
+
+function closeFeedbackModal() {
+  document.getElementById('feedback-modal').classList.remove('open');
+}
+
+function submitFeedback() {
+  const name = document.getElementById('fb-name').value.trim() || 'Unknown User';
+  const msg  = document.getElementById('fb-message').value.trim();
+  if (!msg) { alert('Problem ya message likho pehle.'); return; }
+
+  // Get profile for extra context
+  let profileCtx = '';
+  try {
+    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
+    if (p.company) profileCtx = '\nCompany: ' + p.company;
+    if (p.contact) profileCtx += '\nContact: ' + p.contact;
+  } catch(e) {}
+
   const errCount = importLogEntries ? importLogEntries.filter(e => e.type === 'err').length : 0;
   const recentErrors = importLogEntries
-    ? importLogEntries.filter(e => e.type === 'err').slice(-5).map(e => e.msg).join('\n')
-    : 'No errors logged';
+    ? importLogEntries.filter(e => e.type === 'err').slice(-3).map(e => e.msg).join('\n')
+    : 'No errors';
 
-  const msg = `*Creator Agent — Feedback / Issue Report*
-  
-Shared By: ${sharedBy}
-Tool Version: v9.0
-Total Creators: ${allC.length}
-Error Count: ${errCount}
-Tool URL: https://thoratsahil27-dotcom.github.io/creator-agent
+  const waMsg = `*Creator Agent — Feedback / Issue*\n\nFrom: ${name}${profileCtx}\nVersion: v10.0\nCreators in DB: ${allC.length}\nErrors: ${errCount}\n\n*Message:*\n${msg}\n\n*Recent Errors:*\n${recentErrors}`;
 
-*Recent Errors:*
-${recentErrors}
+  window.open('https://wa.me/918082812805?text=' + encodeURIComponent(waMsg), '_blank');
 
-*My Issue:*
-[Please describe your issue here]`;
+  document.getElementById('fb-form').style.display = 'none';
+  document.getElementById('fb-success').style.display = 'block';
+  setTimeout(() => closeFeedbackModal(), 2800);
+}
 
-  window.open('https://wa.me/918082812805?text=' + encodeURIComponent(msg), '_blank');
+// ============================================================
+// PHONE NUMBER AUTO-FORMAT
+// ============================================================
+function normalizePhone(raw) {
+  if (!raw) return '';
+  // Remove all spaces, dashes, dots
+  let p = String(raw).replace(/[\s\-\.]/g, '');
+  // Remove leading + if present, we'll re-add
+  p = p.replace(/^\+/, '');
+  // If starts with 91 and length is 12 → keep
+  if (p.startsWith('91') && p.length === 12) return '+' + p;
+  // If 10 digits → add 91
+  if (/^\d{10}$/.test(p)) return '+91' + p;
+  // If already has country code different → just clean and return
+  if (p.length > 10) return '+' + p;
+  return raw; // fallback unchanged
+}
+
+// ============================================================
+// LIVE CREATOR SEARCH
+// ============================================================
+function liveCreatorSearch(query) {
+  const panel = document.getElementById('search-results-panel');
+  const clearBtn = document.getElementById('creator-search-clear');
+  const q = query.trim().toLowerCase();
+
+  if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+
+  if (!q || q.length < 2) {
+    panel.style.display = 'none';
+    panel.innerHTML = '';
+    return;
+  }
+
+  const results = allC.filter(c =>
+    (c.name||'').toLowerCase().includes(q) ||
+    (c.niche||'').toLowerCase().includes(q) ||
+    (c.contact||'').includes(q)
+  ).slice(0, 20);
+
+  panel.style.display = 'block';
+
+  if (!results.length) {
+    panel.innerHTML = '<div class="search-no-result">No creators found for "' + escHtml(query) + '"</div>';
+    return;
+  }
+
+  panel.innerHTML = results.map((c, i) => `
+    <div class="search-result-item" onclick="openCreatorDetail(${allC.indexOf(c)})">
+      <div class="sri-name">${escHtml(c.name)}</div>
+      <div class="sri-meta">
+        ${c.niche ? `<span>📌 ${escHtml(c.niche.substring(0,20))}</span>` : ''}
+        ${c.insta_followers ? `<span>📸 ${ff(c.insta_followers)}</span>` : ''}
+        ${c.yt_subscribers ? `<span>▶ ${ff(c.yt_subscribers)}</span>` : ''}
+        ${c.location ? `<span>📍 ${escHtml(c.location)}</span>` : ''}
+        ${c.contact ? `<span>📱 ${escHtml(c.contact)}</span>` : ''}
+        ${c.cost ? `<span>💰 ₹${escHtml(c.cost)}</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function clearCreatorSearch() {
+  const inp = document.getElementById('creator-search-input');
+  const panel = document.getElementById('search-results-panel');
+  const clr = document.getElementById('creator-search-clear');
+  if (inp) inp.value = '';
+  if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
+  if (clr) clr.style.display = 'none';
+}
+
+// ============================================================
+// CREATOR DETAIL MODAL
+// ============================================================
+function openCreatorDetail(idx) {
+  const c = allC[idx];
+  if (!c) return;
+
+  document.getElementById('cd-name').textContent = c.name || '—';
+  document.getElementById('cd-niche').textContent = (c.niche || '').toUpperCase();
+
+  const fields = [
+    ['📸 IG Followers', c.insta_followers ? ff(c.insta_followers) : '—'],
+    ['▶ YT Subscribers', c.yt_subscribers ? ff(c.yt_subscribers) : '—'],
+    ['📍 Location', c.location || '—'],
+    ['⚧ Gender', c.gender || '—'],
+    ['📱 Contact', c.contact || '—'],
+    ['✉️ Email', c.email || '—'],
+    ['💰 Cost / Reel', c.cost ? '₹' + c.cost : '—'],
+    ['📅 Cost Date', c.cost_date || '—'],
+    ['👤 POC Name', c.poc_name || '—'],
+    ['🏢 POC Agency', c.poc_agency || '—'],
+    ['📊 Status', c.status || '—'],
+    ['📝 Notes', c.notes || '—'],
+  ];
+
+  document.getElementById('cd-grid').innerHTML = fields.map(([label, val]) => `
+    <div class="cd-field">
+      <div class="cd-label">${label}</div>
+      <div class="cd-value">${escHtml(String(val))}</div>
+    </div>`).join('');
+
+  const phone = normalizePhone(c.contact || '');
+  const actionsHtml = `
+    ${c.insta_link && c.insta_link.startsWith('http') ? `<a class="btn-sm btn-out" href="${c.insta_link}" target="_blank" rel="noopener" style="text-decoration:none">📸 Open IG</a>` : ''}
+    ${c.yt_link && c.yt_link.startsWith('http') ? `<a class="btn-sm btn-out" href="${c.yt_link}" target="_blank" rel="noopener" style="text-decoration:none">▶ Open YT</a>` : ''}
+    ${phone ? `<button class="btn-sm btn-wa" onclick="window.open('https://wa.me/${phone.replace('+','')}','_blank')">💬 WhatsApp</button>` : ''}
+    <button class="btn-sm btn-pur" onclick="sendToOutreach(${idx});closeCreatorDetail()">📨 Outreach Bhejo</button>
+    <button class="btn-sm btn-out" onclick="closeCreatorDetail()">✕ Close</button>`;
+
+  document.getElementById('cd-actions').innerHTML = actionsHtml;
+  document.getElementById('creator-detail-modal').classList.add('open');
+}
+
+function closeCreatorDetail() {
+  document.getElementById('creator-detail-modal').classList.remove('open');
+}
+
+function sendToOutreach(idx) {
+  const c = allC[idx];
+  if (!c) return;
+  switchTab('outreach');
+  // Clear list and add this creator
+  document.getElementById('or-creator-list').innerHTML = '';
+  addOutreachCreator(c.name, c.contact || '', c.insta_link || '');
+  setTimeout(() => document.getElementById('or-creator-list').scrollIntoView({behavior:'smooth'}), 300);
+}
+
+// ============================================================
+// BULK OUTREACH from Shortlist
+// ============================================================
+function bulkOutreach(source) {
+  let selectedCreators = [];
+
+  if (source === 'shortlist') {
+    const checked = [...document.querySelectorAll('.row-chk:checked')];
+    if (checked.length === 0 && lastS.length > 0) {
+      // None selected → ask if they want all
+      if (!confirm(`Koi creator select nahi kiya. Saare ${Math.min(lastS.length,20)} shortlisted creators Outreach mein load karein?`)) return;
+      selectedCreators = lastS.slice(0, 20);
+    } else if (checked.length === 0) {
+      alert('Pehle Shortlist generate karo, phir creators select karo.');
+      return;
+    } else {
+      const indices = new Set(checked.map(cb => parseInt(cb.dataset.idx)));
+      selectedCreators = lastS.filter((_, i) => indices.has(i));
+    }
+  }
+
+  if (!selectedCreators.length) {
+    alert('Koi creator nahi mila!');
+    return;
+  }
+
+  switchTab('outreach');
+  document.getElementById('or-creator-list').innerHTML = '';
+  selectedCreators.forEach(c => {
+    addOutreachCreator(c.name, c.contact || '', c.insta_link || '');
+  });
+
+  const msg = `✅ ${selectedCreators.length} creators Outreach mein load ho gaye!\n\nAb Campaign Details fill karo aur "Messages Generate Karo" dabao.`;
+  setTimeout(() => {
+    alert(msg);
+    document.getElementById('or-creator-list').scrollIntoView({behavior:'smooth'});
+  }, 400);
+}
+
+// ============================================================
+// GUIDE — updated to support 5 slides
+// ============================================================
+function switchGuide(idx) {
+  for (let i = 0; i < 5; i++) {
+    const slide = document.getElementById('gslide-' + i);
+    const tab = document.getElementById('gtab-' + i);
+    if (slide) slide.style.display = i === idx ? 'block' : 'none';
+    if (tab) tab.classList.toggle('active', i === idx);
+  }
 }
 
 // ============================================================
@@ -3082,22 +3769,9 @@ function showBackupStatus(msg) {
 let orFormat = 'wa';
 let orMessages = [];
 
-function saveOutreachSender() {
-  localStorage.setItem('ca_or_sender', JSON.stringify({
-    name:   document.getElementById('or-name').value,
-    agency: document.getElementById('or-agency').value,
-    phone:  document.getElementById('or-phone').value,
-  }));
-}
+function saveOutreachSender() { /* Profile is source of truth */ }
 
-function loadOutreachSender() {
-  try {
-    const s = JSON.parse(localStorage.getItem('ca_or_sender') || '{}');
-    if (s.name)   document.getElementById('or-name').value   = s.name;
-    if (s.agency) document.getElementById('or-agency').value = s.agency;
-    if (s.phone)  document.getElementById('or-phone').value  = s.phone;
-  } catch(e) {}
-}
+function loadOutreachSender() { /* No-op */ }
 
 function setOrFormat(f) {
   orFormat = f;
@@ -3106,11 +3780,12 @@ function setOrFormat(f) {
 }
 
 function addOutreachCreator(name = '', phone = '', ig = '') {
+  const cleanPhone = normalizePhone(phone) || phone;
   const div = document.createElement('div');
   div.className = 'or-creator-row';
   div.innerHTML = `
     <input placeholder="Creator Name" class="or-cname" value="${escHtml(name)}" style="flex:1.2">
-    <input placeholder="+91 number" class="or-cphone" value="${escHtml(phone)}" style="flex:1">
+    <input placeholder="+91 number" class="or-cphone" value="${escHtml(cleanPhone)}" style="flex:1">
     <input placeholder="IG Link" class="or-cig" value="${escHtml(ig)}" style="flex:1.2;font-size:10px">
     <button class="or-del" onclick="this.parentElement.remove()">✕</button>`;
   document.getElementById('or-creator-list').appendChild(div);
@@ -3141,10 +3816,13 @@ function loadSelectedCreators() {
 }
 
 function generateOutreach() {
+  // Get sender from profile
+  let p = {};
+  try { p = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}'); } catch(e) {}
   const sender = {
-    name:   document.getElementById('or-name').value.trim() || 'Team',
-    agency: document.getElementById('or-agency').value.trim() || 'Our Agency',
-    phone:  document.getElementById('or-phone').value.trim(),
+    name:   p.name   || localStorage.getItem('ca_or_name')   || 'Team',
+    agency: p.company|| localStorage.getItem('ca_or_agency') || 'Our Agency',
+    phone:  normalizePhone(p.contact || localStorage.getItem('ca_or_phone') || ''),
   };
   const brand  = document.getElementById('or-brand').value.trim() || '[Brand]';
   const obj    = document.getElementById('or-obj').value.trim();
@@ -3152,6 +3830,9 @@ function generateOutreach() {
   const date   = document.getElementById('or-date').value.trim();
   const note   = document.getElementById('or-note').value.trim();
   const delivLines = delivRaw ? delivRaw.split('\n').filter(l => l.trim()) : [];
+
+  // Update conf mail creator datalist
+  updateConfCreatorList();
 
   const rows = [...document.querySelectorAll('.or-creator-row')];
   const creators = rows.map(row => ({
@@ -3232,8 +3913,9 @@ function copyOrMsg(idx) {
 }
 
 function orWADirect(idx) {
-  // Option A — direct to specific number
-  const phone = orMessages[idx].creator.phone.replace(/[^0-9]/g, '');
+  // Option A — direct to specific number with auto-format
+  const rawPhone = orMessages[idx].creator.phone || '';
+  const phone = normalizePhone(rawPhone).replace(/^\+/, '') || rawPhone.replace(/[^0-9]/g, '');
   const msg = orMessages[idx].wa;
   window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
 }
@@ -3269,6 +3951,450 @@ function exportOutreachCSV() {
 
 function escHtml(t) {
   return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================================
+// USER PROFILE — saves name, company, email, contact
+// ============================================================
+const PROFILE_KEY = 'ca_user_profile_v10';
+
+function saveProfile() {
+  const profile = {
+    name:           document.getElementById('profile-name')?.value.trim()           || '',
+    company:        document.getElementById('profile-company')?.value.trim()        || '',
+    contact:        document.getElementById('profile-contact')?.value.trim()        || '',
+    email:          document.getElementById('profile-email')?.value.trim()          || '',
+    payment_days:   document.getElementById('profile-payment-days')?.value          || '45',
+    payment_custom: document.getElementById('profile-payment-custom')?.value.trim() || '',
+    tds:            document.getElementById('profile-tds')?.value                   || 'yes',
+    cc:             document.getElementById('profile-cc')?.value.trim()             || '',
+    signature:      document.getElementById('profile-signature')?.value.trim()      || '',
+  };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+
+  // Update About section
+  const aboutUser    = document.getElementById('about-user');
+  const aboutCompany = document.getElementById('about-company');
+  if (aboutUser)    aboutUser.textContent    = profile.name    || 'Not set';
+  if (aboutCompany) aboutCompany.textContent = profile.company || 'Not set';
+
+  // Update welcome footer
+  const wf = document.getElementById('welcome-footer');
+  if (wf && (profile.name || profile.company)) {
+    wf.textContent = [profile.name, profile.company].filter(Boolean).join(' · ');
+  }
+
+  syncProfileToOutreach(profile);
+
+  // Sync conf mail payment/cc
+  const confPayEl = document.getElementById('conf-payment');
+  if (confPayEl && (profile.payment_custom || profile.payment_days)) {
+    confPayEl.placeholder = profile.payment_custom || (profile.payment_days + ' days from invoice');
+  }
+  const confCCEl = document.getElementById('conf-cc');
+  if (confCCEl && profile.cc && !confCCEl.value) confCCEl.value = profile.cc;
+
+  if (profile.name) {
+    const sb = document.getElementById('shared-by');
+    if (sb && !sb.value) sb.value = profile.name;
+    localStorage.setItem(SHARED_BY_KEY, profile.name);
+  }
+
+  const flash = document.getElementById('profile-saved');
+  if (flash) {
+    flash.style.display = 'block';
+    clearTimeout(flash._t);
+    flash._t = setTimeout(() => { flash.style.display = 'none'; }, 2000);
+  }
+}
+
+function loadProfile() {
+  try {
+    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+    setVal('profile-name',           p.name);
+    setVal('profile-company',        p.company);
+    setVal('profile-contact',        p.contact);
+    setVal('profile-email',          p.email);
+    setVal('profile-payment-days',   p.payment_days);
+    setVal('profile-payment-custom', p.payment_custom);
+    setVal('profile-tds',            p.tds);
+    setVal('profile-cc',             p.cc);
+    setVal('profile-signature',      p.signature);
+
+    const aboutUser    = document.getElementById('about-user');
+    const aboutCompany = document.getElementById('about-company');
+    if (aboutUser && p.name)       aboutUser.textContent    = p.name;
+    if (aboutCompany && p.company) aboutCompany.textContent = p.company;
+
+    const wf = document.getElementById('welcome-footer');
+    if (wf && (p.name || p.company)) {
+      wf.textContent = [p.name, p.company].filter(Boolean).join(' · ');
+    }
+    return p;
+  } catch(e) { return {}; }
+}
+
+function syncProfileToOutreach(profile) {
+  // Profile data is now used directly in message generation — no sender card in Outreach tab
+  if (!profile) {
+    try { profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}'); } catch(e) { return; }
+  }
+  // Still save via saveOutreachSender for backward-compat with message generator
+  localStorage.setItem('ca_or_name',   profile.name    || '');
+  localStorage.setItem('ca_or_agency', profile.company || '');
+  localStorage.setItem('ca_or_phone',  normalizePhone(profile.contact || ''));
+}
+
+// ============================================================
+// DELIVERABLES DATABASE
+// ============================================================
+const DELIVERABLES = {
+  video: [
+    'Instagram Reel','YouTube Video','YouTube Shorts','TikTok Video',
+    'Facebook Video','LinkedIn Video','Live Stream','Product Demo Video',
+    'Unboxing Video','Tutorial / How-to Video','Store Visit Reel',
+    'Dedicated Video','Integrated Video'
+  ],
+  image: [
+    'Single Feed Post','Carousel Post','Product Photography',
+    'Lifestyle Photography','Before–After Image','Memes / Graphic Creative',
+    'Instagram Collab Post'
+  ],
+  story: [
+    'Instagram Story','Facebook Story','Snapchat Story',
+    'Story Series (3–5 frames)','Link Sticker Story','Poll / Q&A Story'
+  ],
+  usage: [
+    'Organic Post','Whitelisting','Paid Ad Usage',
+    '1-Month Usage Rights','3-Month Usage Rights','6-Month Usage Rights',
+    '12-Month Usage Rights','Exclusivity'
+  ],
+  other: [
+    'Community Post (YouTube)','Giveaway Post','Contest Announcement',
+    'Brand Tagging','Discount Code Promotion','Affiliate Link Post',
+    'App Install Promotion','Event Promotion','Launch Announcement',
+    'Insights After Live Date'
+  ]
+};
+
+let selectedDelivs = new Set();
+
+function initDelivPicker() {
+  const map = { video:'dp-video', image:'dp-image', story:'dp-story', usage:'dp-usage', other:'dp-other' };
+  Object.keys(map).forEach(cat => {
+    const wrap = document.getElementById(map[cat]);
+    if (!wrap) return;
+    wrap.innerHTML = DELIVERABLES[cat].map(d =>
+      `<button class="deliv-chip" onclick="toggleDeliv(this,'${d.replace(/'/g,"\\'")}')">${d}</button>`
+    ).join('');
+  });
+}
+
+function toggleDeliv(btn, name) {
+  if (selectedDelivs.has(name)) {
+    selectedDelivs.delete(name);
+    btn.classList.remove('sel');
+  } else {
+    selectedDelivs.add(name);
+    btn.classList.add('sel');
+  }
+  syncDelivToTextarea();
+}
+
+function syncDelivToTextarea() {
+  const ta = document.getElementById('or-deliv');
+  if (!ta) return;
+  // Keep any manually typed lines that aren't from picker
+  const manual = ta.value.split('\n').filter(l => l.trim() && !DELIVERABLES.video.concat(DELIVERABLES.image, DELIVERABLES.story, DELIVERABLES.usage, DELIVERABLES.other).includes(l.trim()));
+  const picked = [...selectedDelivs];
+  ta.value = [...picked, ...manual].join('\n');
+}
+
+function clearDelivPicker() {
+  selectedDelivs.clear();
+  document.querySelectorAll('.deliv-chip.sel').forEach(b => b.classList.remove('sel'));
+  const ta = document.getElementById('or-deliv');
+  if (ta) ta.value = '';
+}
+
+// Update creator datalist for confirmation mail
+function updateConfCreatorList() {
+  const dl = document.getElementById('conf-creator-list');
+  if (!dl) return;
+  const rows = document.querySelectorAll('.or-cname');
+  dl.innerHTML = [...rows].map(r => r.value ? `<option value="${escHtml(r.value)}">` : '').join('');
+}
+
+// ============================================================
+// SETUP / ONBOARDING SCREEN
+// ============================================================
+const SETUP_KEY = 'ca_setup_v11';
+
+function initSetup() {
+  const done = localStorage.getItem(SETUP_KEY);
+  const seen = localStorage.getItem(WELCOME_KEY);
+  // Show setup after welcome if never done
+  if (!done && seen) {
+    document.getElementById('setup-screen').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    // Pre-fill from existing profile if any
+    const p = loadProfile();
+    if (p.name)    { const el=document.getElementById('setup-name');    if(el) el.value=p.name; }
+    if (p.company) { const el=document.getElementById('setup-company'); if(el) el.value=p.company; }
+    if (p.contact) { const el=document.getElementById('setup-contact'); if(el) el.value=p.contact; }
+    if (p.email)   { const el=document.getElementById('setup-email');   if(el) el.value=p.email; }
+    // Pre-fill payment from settings
+    const pay = JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}');
+    if (pay.payment_days) { const el=document.getElementById('setup-payment-days'); if(el) el.value=pay.payment_days; }
+    if (pay.cc)           { const el=document.getElementById('setup-cc');           if(el) el.value=pay.cc; }
+  }
+}
+
+function setupValidate() {
+  const ok = document.getElementById('setup-name')?.value.trim() && document.getElementById('setup-company')?.value.trim();
+  document.getElementById('setup-error').style.display = ok ? 'none' : 'none'; // only on submit
+}
+
+function saveSetupAndEnter() {
+  const name    = document.getElementById('setup-name')?.value.trim();
+  const company = document.getElementById('setup-company')?.value.trim();
+  if (!name || !company) {
+    document.getElementById('setup-error').style.display = 'block';
+    return;
+  }
+  // Save profile
+  const profile = {
+    name,
+    company,
+    contact: document.getElementById('setup-contact')?.value.trim() || '',
+    email:   document.getElementById('setup-email')?.value.trim()   || '',
+    payment_days:   document.getElementById('setup-payment-days')?.value || '45',
+    payment_custom: document.getElementById('setup-payment-custom')?.value.trim() || '',
+    tds:     document.getElementById('setup-tds')?.value || 'yes',
+    cc:      document.getElementById('setup-cc')?.value.trim() || '',
+    signature: document.getElementById('setup-signature')?.value.trim() || '',
+  };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  localStorage.setItem(SETUP_KEY, '1');
+  closeSetupScreen();
+  loadProfile();
+  syncProfileToOutreach(profile);
+  // Prefill conf mail
+  const confPayEl = document.getElementById('conf-payment');
+  if (confPayEl && !confPayEl.value) {
+    const days = profile.payment_custom || (profile.payment_days + ' days from invoice/video share date');
+    confPayEl.value = days;
+  }
+  const confCCEl = document.getElementById('conf-cc');
+  if (confCCEl && !confCCEl.value && profile.cc) confCCEl.value = profile.cc;
+}
+
+function skipSetup() {
+  localStorage.setItem(SETUP_KEY, '1');
+  closeSetupScreen();
+}
+
+function closeSetupScreen() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Also update enterTool to show setup next
+function enterTool() {
+  localStorage.setItem(WELCOME_KEY, '1');
+  const ws = document.getElementById('welcome-screen');
+  ws.classList.add('hiding');
+  document.body.style.overflow = '';
+  setTimeout(() => {
+    ws.style.display = 'none';
+    // Show setup if not done
+    if (!localStorage.getItem(SETUP_KEY)) {
+      document.getElementById('setup-screen').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+  }, 650);
+}
+
+// ============================================================
+// CONFIRMATION MAIL GENERATOR
+// ============================================================
+function getProfileForMail() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}'); } catch(e) { return {}; }
+}
+
+function getCampaignDataForMail() {
+  return {
+    brand:       document.getElementById('or-brand')?.value.trim()         || '',
+    campaignName:document.getElementById('or-campaign-name')?.value.trim() || '',
+    shootDate:   document.getElementById('or-shoot-date')?.value.trim()    || '',
+    liveDate:    document.getElementById('or-date')?.value.trim()          || '',
+    city:        document.getElementById('or-city')?.value.trim()          || '',
+    platform:    document.getElementById('or-platform')?.value             || 'Instagram',
+    submitDays:  document.getElementById('or-submit-days')?.value.trim()   || 'Within 2 days of shoot',
+    note:        document.getElementById('or-note')?.value.trim()          || '',
+    deliverables:document.getElementById('or-deliv')?.value.trim()         || '',
+    creatorName: document.getElementById('conf-creator-name')?.value.trim()|| '',
+    commercial:  document.getElementById('conf-commercial')?.value.trim()  || '',
+    payment:     document.getElementById('conf-payment')?.value.trim()     || '',
+    cc:          document.getElementById('conf-cc')?.value.trim()          || '',
+    extra:       document.getElementById('conf-extra')?.value.trim()       || '',
+  };
+}
+
+async function generateConfirmationMail() {
+  const p = getProfileForMail();
+  const d = getCampaignDataForMail();
+  if (!d.creatorName) { alert('Creator ka naam daalo (Confirmation Mail section mein).'); return; }
+  if (!d.brand)       { alert('Brand name daalo (Campaign Details mein).'); return; }
+
+  if (!aiEnabled || !localStorage.getItem('ca_groq_key')) {
+    return generateConfirmationMailOffline();
+  }
+
+  const btn = document.querySelector('[onclick="generateConfirmationMail()"]');
+  if (btn) { btn.innerHTML = '<span class="spin"></span>Generating...'; btn.disabled = true; }
+
+  const paymentLine = d.payment || (p.payment_custom || ((p.payment_days||45) + ' days from video/invoice share date'));
+  const tdsLine     = (p.tds === 'yes') ? '\n(Note: TDS will be deducted)' : '';
+  const signLine    = p.signature || [p.name, p.company, p.email, p.contact].filter(Boolean).join('\n');
+
+  const prompt = `You are an influencer marketing professional writing a formal campaign confirmation email.
+
+Generate a professional confirmation email with the following data:
+
+TO: ${d.creatorName}
+FROM: ${p.name || 'Agency'} (${p.company || 'Agency Name'})
+BRAND: ${d.brand}
+CAMPAIGN: ${d.campaignName || d.brand + ' Campaign'}
+CITY: ${d.city || 'TBD'}
+SHOOT DATE: ${d.shootDate || 'TBD'}
+LIVE DATE: ${d.liveDate || 'TBD'}
+PLATFORM: ${d.platform}
+DELIVERABLES:
+${d.deliverables || 'As discussed'}
+VIDEO SUBMISSION: ${d.submitDays}
+COMMERCIAL: Rs. ${d.commercial || 'As discussed'}/-
+PAYMENT TERMS: ${paymentLine}${tdsLine}
+SPECIAL NOTE: ${d.note || 'None'}
+EXTRA REQUIREMENTS: ${d.extra || 'None'}
+SIGNATURE: ${signLine}
+
+Style: Professional, warm, formal Indian business style. Include:
+1. Greeting with "Good [Morning/Afternoon]"
+2. "Greetings from ${p.company || '[Agency Name]'}!"
+3. Confirmation paragraph
+4. Campaign details in clear format
+5. Standard T&C (video quality HD, no mobile shoot, face visible, insights after 5 days, no back-out policy, need cover image for reel)
+6. "Please go through and let me know if you have any queries"
+7. Signature
+
+Return ONLY the email body text — no subject line, no markdown, plain text only.`;
+
+  try {
+    const result = await callAI(prompt, 900);
+    showConfMail(result);
+  } catch(e) {
+    logError('conf_mail_ai', e.message, 'AI confirmation mail failed');
+    generateConfirmationMailOffline();
+  } finally {
+    if (btn) { btn.innerHTML = '✉️ Generate Confirmation Mail (AI)'; btn.disabled = false; }
+  }
+}
+
+function generateConfirmationMailOffline() {
+  const p = getProfileForMail();
+  const d = getCampaignDataForMail();
+
+  if (!d.creatorName) { alert('Creator ka naam daalo (Confirmation Mail section mein).'); return; }
+  if (!d.brand)       { alert('Brand name daalo (Campaign Details mein).'); return; }
+
+  const paymentLine = d.payment || (p.payment_custom || ((p.payment_days||45) + ' days from video/invoice share date'));
+  const tdsNote     = (p.tds !== 'no') ? '\n(Note: TDS will be deducted)' : '';
+  const signLine    = p.signature || [p.name, p.company, p.email, p.contact].filter(Boolean).join('\n');
+  const agencyName  = p.company || '[Agency Name]';
+  const hour        = new Date().getHours();
+  const greeting    = hour < 12 ? 'good morning' : hour < 17 ? 'good afternoon' : 'good evening';
+
+  const delivLines  = d.deliverables
+    ? d.deliverables.split('\n').filter(l=>l.trim()).map(l => '- ' + l.trim()).join('\n')
+    : '- As discussed';
+
+  const mail = `Hello ${d.creatorName}, ${greeting}.
+
+Greetings from ${agencyName}!
+
+We are pleased to confirm our collaboration for our upcoming campaign with ${d.brand}. Below are the details of the activity:
+
+Campaign Name: ${d.campaignName || d.brand + ' Campaign'}
+${d.shootDate ? 'Date of Shoot: ' + d.shootDate : ''}
+${d.liveDate  ? 'Live Date: '     + d.liveDate  : ''}
+${d.city      ? 'City: '          + d.city       : ''}
+Brand to be covered: ${d.brand}
+
+Media: ${d.platform}
+
+Deliverables:
+${delivLines}
+
+Date for Video Submission: ${d.submitDays}
+
+Commercial: Rs. ${d.commercial || '_______'}/-
+
+Payment Policy: ${paymentLine}${tdsNote}
+${d.note ? '\nNote: ' + d.note : ''}
+
+Terms and Conditions:
+- Talent needs to follow the concept and mandate provided by the brand.
+- Video quality should be HD. Ensure no background noise in voiceovers.
+- A neat, clean, and well-outfitted appearance is required; face should be visible.
+- We will need a cover image for the reel.
+- Please follow mandates to avoid re-shoots.
+- No mobile shoot.
+- Any changes in the video/script/concept must be approved by the client.
+- Kindly share insights after 5 days of the live date.
+- Invoice will be accepted only after receiving insights.
+- The influencer must be present on the assigned date. No back-outs or date changes will be entertained.
+- If the influencer backs out at the last moment, no cancellation fees will be applicable.
+- Payment Terms: ${paymentLine}
+${d.extra ? '\nAdditional Note:\n' + d.extra : ''}
+
+Please go through the details and let me know if you have any doubts or requirements from the brand.
+
+Thank you!
+${signLine}`;
+
+  showConfMail(mail.replace(/\n{3,}/g, '\n\n').trim());
+}
+
+function showConfMail(text) {
+  document.getElementById('conf-mail-text').textContent = text;
+  const out = document.getElementById('conf-mail-output');
+  out.style.display = 'block';
+  out.scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyConfMail() {
+  const text = document.getElementById('conf-mail-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const msg = document.getElementById('conf-copy-msg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 2000);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+// ============================================================
+// DOCX download — moved from inline
+// ============================================================
+function downloadDocx() {
+  alert('User Guide is available inside the Guide tab. Check each slide for detailed instructions.');
 }
 
 // ============================================================
